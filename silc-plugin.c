@@ -4,6 +4,7 @@
 
 #include "silc-plugin.h"
 #include "silc-operations.h"
+#include "commands.h"
 
 WEECHAT_PLUGIN_NAME("silc");
 WEECHAT_PLUGIN_DESCRIPTION("SILC plugin for WeeChat");
@@ -25,25 +26,13 @@ void silc_stopped(SilcClient client, void *application) {
     silc_free(silc_plugin);
 }
 
-/* ===== callbacks for our commands ===== */
-
-int command_silc(void *data, struct t_gui_buffer *buffer, int argc, char **argv, char **argv_eol) {
-    if (silc_plugin->running) {
-        weechat_printf(buffer, "SILC is running :)");
-        return WEECHAT_RC_OK;
-    } else {
-        weechat_printf(buffer, "SILC is not running :(");
-        return WEECHAT_RC_ERROR;
-    }
-}
+/* ===== weechat plugin interface ===== */
 
 // this is the simulation of a main loop that makes the silc client do its work
 int timer_silc(void *data, int remaining_calls) {
     silc_client_run_one(silc_plugin->client);
     return WEECHAT_RC_OK;
 }
-
-/* ===== weechat plugin interface ===== */
 
 int weechat_plugin_init(struct t_weechat_plugin *plugin, int argc, char *argv[]) {
     weechat_plugin = plugin;

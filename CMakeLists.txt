@@ -39,7 +39,7 @@ include_directories(${WEECHATSILC_INCLUDE_DIRS})
 
 ADD_DEFINITIONS(-DHAVE_CONFIG_H -Wall)
 
-ADD_LIBRARY(weechatsilc SHARED silc-plugin.c silc-operations.c)
+ADD_LIBRARY(weechatsilc SHARED silc-plugin.c silc-operations.c commands.c)
 TARGET_LINK_LIBRARIES(weechatsilc ${SILC_LIBRARIES})
 SET_TARGET_PROPERTIES(weechatsilc PROPERTIES 
   OUTPUT_NAME "weechatsilc"
