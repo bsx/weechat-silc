@@ -20,6 +20,8 @@ IF(NOT WEECHAT_INCLUDE_DIR)
   MESSAGE(FATAL_ERROR "weechat not found!")
 ENDIF(NOT WEECHAT_INCLUDE_DIR)
 
+execute_process(COMMAND "hg" "-q" "id" OUTPUT_VARIABLE HGVERSION)
+
 # includes
 
 SET(WEECHATSILC_INCLUDE_DIRS
@@ -37,9 +39,10 @@ ENDFOREACH(X ${SILC_LDFLAGS})
 
 include_directories(${WEECHATSILC_INCLUDE_DIRS})
 
-ADD_DEFINITIONS(-DHAVE_CONFIG_H -Wall)
+ADD_DEFINITIONS(-DHAVE_CONFIG_H -Wall -DHGVERSION="\\"${HGVERSION}"\\")
 
-ADD_LIBRARY(weechatsilc SHARED silc-plugin.c silc-operations.c commands.c)
+ADD_LIBRARY(weechatsilc SHARED silc-plugin.c silc-operations.c silc-commands.c
+    silc-config.c)
 TARGET_LINK_LIBRARIES(weechatsilc ${SILC_LIBRARIES})
 SET_TARGET_PROPERTIES(weechatsilc PROPERTIES 
   OUTPUT_NAME "weechatsilc"

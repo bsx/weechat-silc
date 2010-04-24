@@ -4,13 +4,14 @@
 
 #include "silc-plugin.h"
 #include "silc-operations.h"
-#include "commands.h"
+#include "silc-commands.h"
+#include "silc-config.h"
 
-WEECHAT_PLUGIN_NAME("silc");
-WEECHAT_PLUGIN_DESCRIPTION("SILC plugin for WeeChat");
-WEECHAT_PLUGIN_AUTHOR("Bernd Stolle <bsx+silc@0xcafec0.de>");
-WEECHAT_PLUGIN_VERSION("0.1");
-WEECHAT_PLUGIN_LICENSE("BSD");
+WEECHAT_PLUGIN_NAME(SILC_PLUGIN_NAME);
+WEECHAT_PLUGIN_DESCRIPTION(SILC_PLUGIN_DESCRIPTION);
+WEECHAT_PLUGIN_AUTHOR(SILC_PLUGIN_AUTHOR);
+WEECHAT_PLUGIN_VERSION(SILC_PLUGIN_VERSION);
+WEECHAT_PLUGIN_LICENSE(SILC_PLUGIN_LICENSE);
 
 /* ===== SILC callbacks ===== */
 
@@ -37,6 +38,16 @@ int timer_silc(void *data, int remaining_calls) {
 int weechat_plugin_init(struct t_weechat_plugin *plugin, int argc, char *argv[]) {
     weechat_plugin = plugin;
     SilcClientParams params;
+
+    if (silc_plugin_config_init() < 0) {
+        weechat_log_printf("could not initialize SILC plugin config");
+        return WEECHAT_RC_ERROR;
+    }
+
+    if (silc_plugin_config_read() < 0) {
+        weechat_log_printf("could not read SILC plugin config file");
+        return WEECHAT_RC_ERROR;
+    }
 
     memset(&params, 0, sizeof(params));
     params.threads = TRUE;
@@ -71,6 +82,7 @@ int weechat_plugin_init(struct t_weechat_plugin *plugin, int argc, char *argv[])
 
 int weechat_plugin_end(struct t_weechat_plugin *plugin) {
     silc_client_stop(silc_plugin->client, silc_stopped, NULL);
+    silc_plugin_config_write();
     return WEECHAT_RC_OK;
 }
 

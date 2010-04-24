@@ -3,7 +3,7 @@
 #include "weechat-plugin.h"
 
 #include "silc-plugin.h"
-#include "commands.h"
+#include "silc-commands.h"
 
 /* ===== callbacks for our commands ===== */
 
