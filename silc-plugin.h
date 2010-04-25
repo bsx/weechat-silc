@@ -14,6 +14,8 @@ struct t_weechat_plugin *weechat_plugin;
 
 typedef struct {
     SilcClient client;
+    SilcPublicKey public_key;
+    SilcPrivateKey private_key;
     bool running;
 } *SilcPlugin;
 

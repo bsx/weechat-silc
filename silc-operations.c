@@ -5,7 +5,12 @@
 #include "silc-plugin.h"
 
 void silc_say(SilcClient client, SilcClientConnection conn, SilcClientMessageType type, char *msg, ...) {
-    weechat_log_printf("silc_say was called");
+    char str[200];
+    va_list va;
+    va_start(va, msg);
+    vsnprintf(str, sizeof(str) - 1, msg, va);
+    weechat_printf(NULL, "SILC: %s", str);
+    va_end(va);
 }
 
 void silc_channel_message(SilcClient client, SilcClientConnection conn, SilcClientEntry sender,
@@ -20,7 +25,26 @@ void silc_private_message(SilcClient client, SilcClientConnection conn, SilcClie
 }
 
 void silc_notify(SilcClient client, SilcClientConnection conn, SilcNotifyType type, ...) {
-    weechat_log_printf("silc_notify was called");
+    char *str;
+    va_list va;
+
+    va_start(va, type);
+
+    switch (type) {
+        case SILC_NOTIFY_TYPE_NONE:
+            str = va_arg(va, char *);
+            weechat_printf(NULL, "notify: %s", str);
+            break;
+        case SILC_NOTIFY_TYPE_MOTD:
+            str = va_arg(va, char *);
+            weechat_printf(NULL, "MOTD: %s", str);
+            break;
+        default:
+            weechat_log_printf("silc_notify was called with unknown type");
+            break;
+    }
+
+    va_end(va);
 }
 
 void silc_command(SilcClient client, SilcClientConnection conn, SilcBool success, SilcCommand command, SilcStatus status, SilcUInt32 argc, unsigned char **argv) {
@@ -33,10 +57,12 @@ void silc_command_reply(SilcClient client, SilcClientConnection conn, SilcComman
 
 void silc_get_auth_method(SilcClient client, SilcClientConnection conn, char *hostname, SilcUInt16 port, SilcAuthMethod auth_method, SilcGetAuthMeth completion, void *context) {
     weechat_log_printf("silc_get_auth_method was called");
+    completion(SILC_AUTH_NONE, NULL, 0, context);
 }
 
 void silc_verify_public_key(SilcClient client, SilcClientConnection conn, SilcConnectionType conn_type, SilcPublicKey public_key, SilcVerifyPublicKey completion, void *context) {
     weechat_log_printf("silc_verify_public_key was called");
+    completion(TRUE, context);
 }
 
 void silc_ask_passphrase(SilcClient client, SilcClientConnection conn, SilcAskPassphrase completion, void *context) {
