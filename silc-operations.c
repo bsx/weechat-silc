@@ -9,7 +9,7 @@ void silc_say(SilcClient client, SilcClientConnection conn, SilcClientMessageTyp
     va_list va;
     va_start(va, msg);
     vsnprintf(str, sizeof(str) - 1, msg, va);
-    weechat_printf(NULL, "SILC: %s", str);
+    weechat_printf(silc_plugin->server_buffer, "%s", str);
     va_end(va);
 }
 
@@ -33,11 +33,11 @@ void silc_notify(SilcClient client, SilcClientConnection conn, SilcNotifyType ty
     switch (type) {
         case SILC_NOTIFY_TYPE_NONE:
             str = va_arg(va, char *);
-            weechat_printf(NULL, "notify: %s", str);
+            weechat_printf(silc_plugin->server_buffer, "notify: %s", str);
             break;
         case SILC_NOTIFY_TYPE_MOTD:
             str = va_arg(va, char *);
-            weechat_printf(NULL, "MOTD: %s", str);
+            weechat_printf(silc_plugin->server_buffer, "MOTD: %s", str);
             break;
         default:
             weechat_log_printf("silc_notify was called with unknown type");

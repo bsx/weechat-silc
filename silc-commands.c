@@ -28,6 +28,7 @@ void silc_plugin_connected(SilcClient client, SilcClientConnection conn, SilcCli
         weechat_log_printf("Error connecting to server: %d", status);
         return;
     }
+    silc_plugin->connection = conn;
 
     weechat_log_printf("connection successfull");
 }
@@ -41,10 +42,16 @@ int command_sconnect(void *data, struct t_gui_buffer *buffer, int argc, char **a
     }
 
     servername = argv[1];
-    weechat_printf(buffer, "trying to connect to %s", servername);
+
+    // create a new buffer for this connection but merge it into the main window
+    silc_plugin->server_buffer = weechat_buffer_new(servername, NULL, NULL, NULL, NULL);
+    weechat_buffer_merge(silc_plugin->server_buffer, weechat_buffer_search_main());
+
+    weechat_printf(silc_plugin->server_buffer, "trying to connect to %s", servername);
     if (!silc_client_connect_to_server(silc_plugin->client, NULL, silc_plugin->public_key, silc_plugin->private_key,
             servername, 706, silc_plugin_connected, NULL)) {
-        weechat_printf(buffer, "connection to server failed");
+        weechat_printf(silc_plugin->server_buffer, "connection to server failed");
+        weechat_buffer_close(silc_plugin->server_buffer);
         return WEECHAT_RC_ERROR;
     }
     return WEECHAT_RC_OK;
