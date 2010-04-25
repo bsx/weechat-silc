@@ -3,6 +3,10 @@
 
 struct t_config_file *config_file;
 
+struct t_config_option *option_default_username;
+struct t_config_option *option_default_realname;
+struct t_config_option *option_default_nick;
+
 int silc_plugin_config_init();
 
 int silc_plugin_config_write();

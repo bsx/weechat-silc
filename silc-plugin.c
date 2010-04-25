@@ -66,7 +66,8 @@ int weechat_plugin_init(struct t_weechat_plugin *plugin, int argc, char *argv[])
     }
     weechat_log_printf("SILC client allocated");
 
-    if (!silc_client_init(silc_plugin->client, silc_get_username(), silc_net_localhost(), "Lord Vader", silc_running, silc_plugin)) {
+    if (!silc_client_init(silc_plugin->client, weechat_config_string(option_default_username),
+                silc_net_localhost(), weechat_config_string(option_default_realname), silc_running, silc_plugin)) {
         weechat_log_printf("could not initialize SILC client");
         return WEECHAT_RC_ERROR;
     }
