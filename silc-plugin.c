@@ -83,6 +83,7 @@ int weechat_plugin_init(struct t_weechat_plugin *plugin, int argc, char *argv[])
 int weechat_plugin_end(struct t_weechat_plugin *plugin) {
     silc_client_stop(silc_plugin->client, silc_stopped, NULL);
     silc_plugin_config_write();
+    silc_plugin_config_free();
     return WEECHAT_RC_OK;
 }
 

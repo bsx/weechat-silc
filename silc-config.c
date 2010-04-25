@@ -21,3 +21,7 @@ int silc_plugin_config_write() {
 int silc_plugin_config_read() {
     return weechat_config_read(config_file);
 }
+
+void silc_plugin_config_free() {
+    return weechat_config_free(config_file);
+}

@@ -9,4 +9,6 @@ int silc_plugin_config_write();
 
 int silc_plugin_config_read();
 
+void silc_plugin_config_free();
+
 #endif /* PLUGIN_CONFIG_H */
