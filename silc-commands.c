@@ -47,12 +47,11 @@ int command_sconnect(void *data, struct t_gui_buffer *buffer, int argc, char **a
     silc_plugin->server_buffer = weechat_buffer_new(servername, NULL, NULL, NULL, NULL);
     weechat_buffer_merge(silc_plugin->server_buffer, weechat_buffer_search_main());
 
-    weechat_printf(silc_plugin->server_buffer, "trying to connect to %s", servername);
+    weechat_printf(silc_plugin->server_buffer, "SILC: trying to connect to %s", servername);
     if (!silc_client_connect_to_server(silc_plugin->client, NULL, silc_plugin->public_key, silc_plugin->private_key,
             servername, 706, silc_plugin_connected, NULL)) {
-        weechat_printf(silc_plugin->server_buffer, "connection to server failed");
+        weechat_printf(silc_plugin->server_buffer, "%sSILC: connection to server failed", weechat_prefix("error"));
         weechat_buffer_close(silc_plugin->server_buffer);
-        return WEECHAT_RC_ERROR;
     }
     return WEECHAT_RC_OK;
 }
