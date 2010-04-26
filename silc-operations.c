@@ -7,9 +7,12 @@
 void silc_say(SilcClient client, SilcClientConnection conn, SilcClientMessageType type, char *msg, ...) {
     char str[200];
     va_list va;
+    weechat_infolist_reset_item_cursor(silc_plugin->connections);
+    weechat_infolist_next(silc_plugin->connections);
+    struct t_gui_buffer *server_buffer = weechat_infolist_pointer(silc_plugin->connections, "serverbuffer");
     va_start(va, msg);
     vsnprintf(str, sizeof(str) - 1, msg, va);
-    weechat_printf(silc_plugin->server_buffer, "SILC: %s", str);
+    weechat_printf(server_buffer, "SILC: %s", str);
     va_end(va);
 }
 
@@ -27,17 +30,20 @@ void silc_private_message(SilcClient client, SilcClientConnection conn, SilcClie
 void silc_notify(SilcClient client, SilcClientConnection conn, SilcNotifyType type, ...) {
     char *str;
     va_list va;
+    weechat_infolist_reset_item_cursor(silc_plugin->connections);
+    weechat_infolist_next(silc_plugin->connections);
+    struct t_gui_buffer *server_buffer = weechat_infolist_pointer(silc_plugin->connections, "serverbuffer");
 
     va_start(va, type);
 
     switch (type) {
         case SILC_NOTIFY_TYPE_NONE:
             str = va_arg(va, char *);
-            weechat_printf(silc_plugin->server_buffer, "%s%s", weechat_prefix("network"), str);
+            weechat_printf(server_buffer, "%s%s", weechat_prefix("network"), str);
             break;
         case SILC_NOTIFY_TYPE_MOTD:
             str = va_arg(va, char *);
-            weechat_printf(silc_plugin->server_buffer, "%sMOTD: %s", weechat_prefix("network"), str);
+            weechat_printf(server_buffer, "%sMOTD: %s", weechat_prefix("network"), str);
             break;
         default:
             weechat_log_printf("silc_notify was called with unknown type");

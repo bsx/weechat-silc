@@ -14,10 +14,9 @@ struct t_weechat_plugin *weechat_plugin;
 
 typedef struct {
     SilcClient client;
-    SilcClientConnection connection;
     SilcPublicKey public_key;
     SilcPrivateKey private_key;
-    struct t_gui_buffer *server_buffer;
+    struct t_infolist *connections;
     bool running;
 } *SilcPlugin;
 

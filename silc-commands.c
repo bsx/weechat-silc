@@ -28,13 +28,14 @@ void silc_plugin_connected(SilcClient client, SilcClientConnection conn, SilcCli
         weechat_log_printf("Error connecting to server: %d", status);
         return;
     }
-    silc_plugin->connection = conn;
+    weechat_infolist_new_var_pointer(context, "connection", conn);
 
     weechat_log_printf("connection successfull");
 }
 
 int command_sconnect(void *data, struct t_gui_buffer *buffer, int argc, char **argv, char **argv_eol) {
     char *servername;
+    struct t_gui_buffer *server_buffer;
 
     if (argc < 2) {
         weechat_printf(buffer, "you need to specify a servername to connect to");
@@ -44,14 +45,18 @@ int command_sconnect(void *data, struct t_gui_buffer *buffer, int argc, char **a
     servername = argv[1];
 
     // create a new buffer for this connection but merge it into the main window
-    silc_plugin->server_buffer = weechat_buffer_new(servername, NULL, NULL, NULL, NULL);
-    weechat_buffer_merge(silc_plugin->server_buffer, weechat_buffer_search_main());
+    server_buffer = weechat_buffer_new(servername, NULL, NULL, NULL, NULL);
+    weechat_buffer_merge(server_buffer, weechat_buffer_search_main());
 
-    weechat_printf(silc_plugin->server_buffer, "SILC: trying to connect to %s", servername);
+    struct t_infolist_item *item = weechat_infolist_new_item(silc_plugin->connections);
+    weechat_infolist_new_var_pointer(item, "serverbuffer", server_buffer);
+
+    weechat_printf(server_buffer, "SILC: trying to connect to %s", servername);
     if (!silc_client_connect_to_server(silc_plugin->client, NULL, silc_plugin->public_key, silc_plugin->private_key,
-            servername, 706, silc_plugin_connected, NULL)) {
-        weechat_printf(silc_plugin->server_buffer, "%sSILC: connection to server failed", weechat_prefix("error"));
-        weechat_buffer_close(silc_plugin->server_buffer);
+            servername, 706, silc_plugin_connected, item)) {
+        weechat_printf(server_buffer, "%sSILC: connection to server failed", weechat_prefix("error"));
+        weechat_buffer_close(server_buffer);
     }
+
     return WEECHAT_RC_OK;
 }
