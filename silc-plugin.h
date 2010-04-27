@@ -16,10 +16,13 @@ typedef struct {
     SilcClient client;
     SilcPublicKey public_key;
     SilcPrivateKey private_key;
-    struct t_infolist *connections;
     bool running;
 } *SilcPlugin;
 
 SilcPlugin silc_plugin;
+
+typedef struct {
+    struct t_gui_buffer *server_buffer;
+} *SilcConnectionContext;
 
 #endif /* SILC_PLUGIN_H */

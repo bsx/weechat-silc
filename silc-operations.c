@@ -7,9 +7,11 @@
 void silc_say(SilcClient client, SilcClientConnection conn, SilcClientMessageType type, char *msg, ...) {
     char str[200];
     va_list va;
-    weechat_infolist_reset_item_cursor(silc_plugin->connections);
-    weechat_infolist_next(silc_plugin->connections);
-    struct t_gui_buffer *server_buffer = weechat_infolist_pointer(silc_plugin->connections, "serverbuffer");
+    struct t_gui_buffer *server_buffer = NULL;
+    SilcConnectionContext ctx = conn->context;
+    if (ctx) {
+        server_buffer = ctx->server_buffer;
+    }
     va_start(va, msg);
     vsnprintf(str, sizeof(str) - 1, msg, va);
     weechat_printf(server_buffer, "SILC: %s", str);
@@ -30,9 +32,11 @@ void silc_private_message(SilcClient client, SilcClientConnection conn, SilcClie
 void silc_notify(SilcClient client, SilcClientConnection conn, SilcNotifyType type, ...) {
     char *str;
     va_list va;
-    weechat_infolist_reset_item_cursor(silc_plugin->connections);
-    weechat_infolist_next(silc_plugin->connections);
-    struct t_gui_buffer *server_buffer = weechat_infolist_pointer(silc_plugin->connections, "serverbuffer");
+    struct t_gui_buffer *server_buffer = NULL;
+    SilcConnectionContext ctx = conn->context;
+    if (ctx) {
+        server_buffer = ctx->server_buffer;
+    }
 
     va_start(va, type);
 

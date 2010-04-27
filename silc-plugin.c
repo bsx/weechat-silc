@@ -25,7 +25,6 @@ void silc_stopped(SilcClient client, void *application) {
     weechat_log_printf("SILC stopped");
     silc_plugin->running = 0;
     silc_client_free(silc_plugin->client);
-    weechat_infolist_free(silc_plugin->connections);
     silc_free(silc_plugin);
 }
 
@@ -60,8 +59,6 @@ int weechat_plugin_init(struct t_weechat_plugin *plugin, int argc, char *argv[])
         return WEECHAT_RC_ERROR;
     }
     weechat_log_printf("SILC plugin context allocated");
-
-    silc_plugin->connections = weechat_infolist_new();
 
     silc_plugin->client = silc_client_alloc(&ops, &params, silc_plugin, NULL);
     if (!silc_plugin->client) {
