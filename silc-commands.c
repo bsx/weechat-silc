@@ -33,6 +33,10 @@ void silc_plugin_connected(SilcClient client, SilcClientConnection conn, SilcCli
     connContext->server_buffer = context;
 
     conn->context = connContext;
+
+    SilcPluginServerList server = find_server_for_buffer(context);
+    server->connection = conn;
+
     weechat_log_printf("connection successfull");
 }
 
@@ -59,12 +63,7 @@ int command_sconnect(void *data, struct t_gui_buffer *buffer, int argc, char **a
         weechat_buffer_close(server_buffer);
     }
 
-    server = malloc(sizeof(struct SilcPluginServer));
-    server_list->next = server;
-    server->server_buffer = server_buffer;
-    server->channels = malloc(sizeof(struct SilcPluginChannel));
-
-    server_list = server;
+    server = add_server(NULL, NULL, server_buffer);
 
     return WEECHAT_RC_OK;
 }

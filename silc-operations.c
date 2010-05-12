@@ -72,7 +72,13 @@ void silc_get_auth_method(SilcClient client, SilcClientConnection conn, char *ho
 }
 
 void silc_verify_public_key(SilcClient client, SilcClientConnection conn, SilcConnectionType conn_type, SilcPublicKey public_key, SilcVerifyPublicKey completion, void *context) {
+    SilcPluginServerList server;
+
     weechat_log_printf("silc_verify_public_key was called");
+
+    server = find_server_for_buffer(context);
+    server->server_key = public_key;
+
     completion(TRUE, context);
 }
 

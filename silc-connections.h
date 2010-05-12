@@ -28,5 +28,7 @@ SilcPluginServerList server_list;
 
 struct SilcPluginServer *find_server_for_buffer(struct t_gui_buffer *server_buffer);
 struct SilcPluginChannel *find_channel_for_buffer(struct t_gui_buffer *channel_buffer);
+struct SilcPluginServer *add_server(SilcClientConnection connection, SilcPublicKey server_key, struct t_gui_buffer *server_buffer);
+struct SilcPluginChannel *add_channel(struct SilcPluginServer *server, SilcChannelEntry channel_entry, SilcChannelPrivateKey channel_key, struct t_gui_buffer *channel_buffer);
 
 #endif /* __SILC_CONNECTIONS_H */
