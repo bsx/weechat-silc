@@ -77,7 +77,9 @@ void silc_verify_public_key(SilcClient client, SilcClientConnection conn, SilcCo
     weechat_log_printf("silc_verify_public_key was called");
 
     server = find_server_for_buffer(context);
-    server->server_key = public_key;
+    if (server != NULL) {
+        server->server_key = public_key;
+    }
 
     completion(TRUE, context);
 }

@@ -80,6 +80,7 @@ int weechat_plugin_init(struct t_weechat_plugin *plugin, int argc, char *argv[])
     silc_plugin_get_keypair("weechat", "", 1, &silc_plugin->public_key, &silc_plugin->private_key);
 
     server_list = malloc(sizeof(struct SilcPluginServer));
+    server_list->next = NULL;
 
     weechat_hook_command("silc", "This is the SILC plugin", "", "", NULL, &command_silc, NULL);
     weechat_hook_command("sconnect", "connect to a SILC server", "servername", "name of the server to connect to", NULL, &command_sconnect, NULL);

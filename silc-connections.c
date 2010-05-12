@@ -1,13 +1,17 @@
+#include "silc.h"
+#include "silcclient.h"
+
 #include "silc-connections.h"
 
 struct SilcPluginServer *find_server_for_buffer(struct t_gui_buffer *server_buffer) {
     struct SilcPluginServer *server;
     server = server_list;
-    while (server = server->next) {
+    while ((server = server->next) != NULL) {
         if (server->server_buffer == server_buffer) {
             return server;
         }
     }
+    return NULL;
 }
 
 struct SilcPluginChannel *find_channel_for_buffer(struct t_gui_buffer *channel_buffer) {
@@ -15,14 +19,15 @@ struct SilcPluginChannel *find_channel_for_buffer(struct t_gui_buffer *channel_b
     struct SilcPluginChannel *channel;
 
     server = server_list;
-    while (server = server->next) {
+    while ((server = server->next) != NULL) {
         channel = server->channels;
-        while (channel = channel->next) {
+        while ((channel = channel->next) != NULL) {
             if (channel->channel_buffer == channel_buffer) {
                 return channel;
             }
         }
     }
+    return NULL;
 }
 
 struct SilcPluginServer *add_server(SilcClientConnection connection, SilcPublicKey server_key, struct t_gui_buffer *server_buffer) {
