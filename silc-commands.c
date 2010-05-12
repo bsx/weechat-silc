@@ -4,6 +4,7 @@
 
 #include "silc-plugin.h"
 #include "silc-commands.h"
+#include "silc-connections.h"
 
 /* ===== callbacks for our commands ===== */
 
@@ -38,6 +39,7 @@ void silc_plugin_connected(SilcClient client, SilcClientConnection conn, SilcCli
 int command_sconnect(void *data, struct t_gui_buffer *buffer, int argc, char **argv, char **argv_eol) {
     char *servername;
     struct t_gui_buffer *server_buffer;
+    SilcPluginServerList server;
 
     if (argc < 2) {
         weechat_printf(buffer, "you need to specify a servername to connect to");
@@ -56,6 +58,13 @@ int command_sconnect(void *data, struct t_gui_buffer *buffer, int argc, char **a
         weechat_printf(server_buffer, "%sSILC: connection to server failed", weechat_prefix("error"));
         weechat_buffer_close(server_buffer);
     }
+
+    server = malloc(sizeof(struct SilcPluginServer));
+    server_list->next = server;
+    server->server_buffer = server_buffer;
+    server->channels = malloc(sizeof(struct SilcPluginChannel));
+
+    server_list = server;
 
     return WEECHAT_RC_OK;
 }

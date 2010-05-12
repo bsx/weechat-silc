@@ -1,8 +1,6 @@
 #ifndef SILC_PLUGIN_H
 #define SILC_PLUGIN_H
 
-#include "weechat-plugin.h"
-
 #define SILC_CONFIG_NAME "silc"
 #define SILC_PLUGIN_NAME "silc"
 #define SILC_PLUGIN_DESCRIPTION "bring secure internet live conferencing (SILC) to weechat"
@@ -20,9 +18,5 @@ typedef struct {
 } *SilcPlugin;
 
 SilcPlugin silc_plugin;
-
-typedef struct {
-    struct t_gui_buffer *server_buffer;
-} *SilcConnectionContext;
 
 #endif /* SILC_PLUGIN_H */

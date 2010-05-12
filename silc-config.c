@@ -1,5 +1,6 @@
 #include "silc.h"
 #include "silcclient.h"
+#include "weechat-plugin.h"
 
 #include "silc-plugin.h"
 #include "silc-config.h"

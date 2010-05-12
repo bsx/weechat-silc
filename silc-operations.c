@@ -3,6 +3,7 @@
 #include "weechat-plugin.h"
 
 #include "silc-plugin.h"
+#include "silc-connections.h"
 
 void silc_say(SilcClient client, SilcClientConnection conn, SilcClientMessageType type, char *msg, ...) {
     char str[200];

@@ -7,6 +7,7 @@
 #include "silc-commands.h"
 #include "silc-config.h"
 #include "silc-keys.h"
+#include "silc-connections.h"
 
 WEECHAT_PLUGIN_NAME(SILC_PLUGIN_NAME);
 WEECHAT_PLUGIN_DESCRIPTION(SILC_PLUGIN_DESCRIPTION);
@@ -77,6 +78,8 @@ int weechat_plugin_init(struct t_weechat_plugin *plugin, int argc, char *argv[])
     weechat_log_printf("SILC client initialized");
 
     silc_plugin_get_keypair("weechat", "", 1, &silc_plugin->public_key, &silc_plugin->private_key);
+
+    server_list = malloc(sizeof(struct SilcPluginServer));
 
     weechat_hook_command("silc", "This is the SILC plugin", "", "", NULL, &command_silc, NULL);
     weechat_hook_command("sconnect", "connect to a SILC server", "servername", "name of the server to connect to", NULL, &command_sconnect, NULL);
