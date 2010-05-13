@@ -57,14 +57,16 @@ struct SilcPluginServer *add_server(char *server_name, SilcClientConnection conn
     }
 
     new_server = malloc(sizeof(struct SilcPluginServer));
+    memset(new_server, 0, sizeof(struct SilcPluginServer));
+
     new_server->server_name = server_name_copy;
     new_server->connection = connection;
     new_server->server_key = server_key;
     new_server->server_buffer = server_buffer;
     new_server->channels = malloc(sizeof(struct SilcPluginChannel));
-    new_server->channels->next = NULL;
-    new_server->next = NULL;
+    memset(new_server->channels, 0, sizeof(struct SilcPluginChannel));
 
+    new_server->prev = server;
     server->next = new_server;
 
     return new_server;
@@ -80,15 +82,65 @@ struct SilcPluginChannel *add_channel(char *channel_name, struct SilcPluginServe
     }
 
     new_channel = malloc(sizeof(struct SilcPluginChannel));
+    memset(new_channel, 0, sizeof(struct SilcPluginChannel));
+
     new_channel->channel_name = channel_name;
     new_channel->channel_entry = channel_entry;
     new_channel->channel_key = channel_key;
     new_channel->channel_buffer = channel_buffer;
-    new_channel->next = NULL;
 
+    new_channel->prev = channel;
     channel->next = new_channel;
 
     return new_channel;
+}
+
+void remove_server(struct SilcPluginServer *server) {
+    struct SilcPluginServer *prev;
+    struct SilcPluginServer *next;
+    struct SilcPluginChannel *channel;
+    struct SilcPluginChannel *next_chan;
+
+    prev = server->prev;
+    next = server->next;
+
+    if (prev != NULL) {
+        prev->next = next;
+    }
+    if (next != NULL) {
+        next->prev = prev;
+    }
+
+    channel = server->channels;
+    while (channel != NULL) {
+        next_chan = channel->next;
+        if (channel->channel_name != NULL) {
+            free(channel->channel_name);
+        }
+        free(channel);
+        channel = next_chan;
+    }
+
+    free(server->server_name);
+    free(server);
+}
+
+void remove_channel(struct SilcPluginChannel *channel) {
+    struct SilcPluginChannel *prev;
+    struct SilcPluginChannel *next;
+
+    prev = channel->prev;
+    next = channel->next;
+
+    if (prev != NULL) {
+        prev->next = next;
+    }
+    if (next != NULL) {
+        next->prev = prev;
+    }
+
+    free(channel->channel_name);
+    free(channel);
 }
 
 void list_connections(struct t_gui_buffer *buffer) {

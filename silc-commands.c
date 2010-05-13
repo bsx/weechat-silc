@@ -11,10 +11,14 @@
 void silc_plugin_connected(SilcClient client, SilcClientConnection conn, SilcClientConnectionStatus status,
         SilcStatus error, const char *message, void *context) {
     SilcConnectionContext connContext;
+    SilcPluginServerList server;
+
+    server = find_server_for_buffer(context);
 
     if (status == SILC_CLIENT_CONN_DISCONNECTED) {
         weechat_log_printf("Disconnected: %s", message ? message : "");
         weechat_buffer_close(context);
+        remove_server(server);
         return;
     }
 
@@ -27,7 +31,6 @@ void silc_plugin_connected(SilcClient client, SilcClientConnection conn, SilcCli
 
     conn->context = connContext;
 
-    SilcPluginServerList server = find_server_for_buffer(context);
     server->connection = conn;
 
     weechat_log_printf("connection successfull");
