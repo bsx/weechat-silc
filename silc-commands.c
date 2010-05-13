@@ -59,7 +59,7 @@ int command_silc_connect(void *data, struct t_gui_buffer *buffer, int argc, char
         weechat_buffer_close(server_buffer);
     }
 
-    server = add_server(NULL, NULL, server_buffer);
+    server = add_server(servername, NULL, NULL, server_buffer);
 
     return WEECHAT_RC_OK;
 }
@@ -85,6 +85,7 @@ int command_silc(void *data, struct t_gui_buffer *buffer, int argc, char **argv,
     if (argc < 2) {
         if (silc_plugin->running) {
             weechat_printf(buffer, "SILC version %s is running :)", SILC_PLUGIN_VERSION);
+            list_connections(buffer);
             return WEECHAT_RC_OK;
         } else {
             weechat_printf(buffer, "SILC is not running :(");
