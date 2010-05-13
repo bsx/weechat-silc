@@ -10,8 +10,11 @@
 
 void silc_plugin_connected(SilcClient client, SilcClientConnection conn, SilcClientConnectionStatus status,
         SilcStatus error, const char *message, void *context) {
+    SilcConnectionContext connContext;
+
     if (status == SILC_CLIENT_CONN_DISCONNECTED) {
         weechat_log_printf("Disconnected: %s", message ? message : "");
+        weechat_buffer_close(context);
         return;
     }
 
@@ -19,7 +22,7 @@ void silc_plugin_connected(SilcClient client, SilcClientConnection conn, SilcCli
         weechat_log_printf("Error connecting to server: %d", status);
         return;
     }
-    SilcConnectionContext connContext = malloc(sizeof(SilcConnectionContext));
+    connContext = malloc(sizeof(SilcConnectionContext));
     connContext->server_buffer = context;
 
     conn->context = connContext;
@@ -61,6 +64,19 @@ int command_silc_connect(void *data, struct t_gui_buffer *buffer, int argc, char
     return WEECHAT_RC_OK;
 }
 
+int command_silc_disconnect(void *data, struct t_gui_buffer *buffer, int argc, char **argv, char **argv_eol) {
+    SilcPluginServerList server;
+
+    server = find_server_for_buffer(buffer);
+    if (server == NULL) {
+        weechat_printf(buffer, "%sCurrent buffer is not a SILC buffer", weechat_prefix("error"));
+        return WEECHAT_RC_OK;
+    }
+
+    silc_client_command_call(silc_plugin->client, server->connection, "QUIT");
+    return WEECHAT_RC_OK;
+}
+
 /* ===== the /silc command, our main entry point ===== */
 
 int command_silc(void *data, struct t_gui_buffer *buffer, int argc, char **argv, char **argv_eol) {
@@ -80,6 +96,9 @@ int command_silc(void *data, struct t_gui_buffer *buffer, int argc, char **argv,
 
     if (strncmp(action, "connect", 7) == 0) {
         return command_silc_connect(data, buffer, argc, argv, argv_eol);
+    }
+    if (strncmp(action, "disconnect", 10) == 0) {
+        return command_silc_disconnect(data, buffer, argc, argv, argv_eol);
     }
 
     weechat_printf(buffer, "unrecognized command %s", action);

@@ -59,7 +59,7 @@ void silc_notify(SilcClient client, SilcClientConnection conn, SilcNotifyType ty
 }
 
 void silc_command(SilcClient client, SilcClientConnection conn, SilcBool success, SilcCommand command, SilcStatus status, SilcUInt32 argc, unsigned char **argv) {
-    weechat_log_printf("silc_command was called");
+    weechat_log_printf("SILC command %x was called. Success: %x", command, success);
 }
 
 void silc_command_reply(SilcClient client, SilcClientConnection conn, SilcCommand command, SilcStatus status, SilcStatus error, va_list ap) {
