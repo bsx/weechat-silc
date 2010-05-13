@@ -6,17 +6,7 @@
 #include "silc-commands.h"
 #include "silc-connections.h"
 
-/* ===== callbacks for our commands ===== */
-
-int command_silc(void *data, struct t_gui_buffer *buffer, int argc, char **argv, char **argv_eol) {
-    if (silc_plugin->running) {
-        weechat_printf(buffer, "SILC version %s is running :)", SILC_PLUGIN_VERSION);
-        return WEECHAT_RC_OK;
-    } else {
-        weechat_printf(buffer, "SILC is not running :(");
-        return WEECHAT_RC_ERROR;
-    }
-}
+/* ===== completion callbacks ===== */
 
 void silc_plugin_connected(SilcClient client, SilcClientConnection conn, SilcClientConnectionStatus status,
         SilcStatus error, const char *message, void *context) {
@@ -40,23 +30,26 @@ void silc_plugin_connected(SilcClient client, SilcClientConnection conn, SilcCli
     weechat_log_printf("connection successfull");
 }
 
-int command_sconnect(void *data, struct t_gui_buffer *buffer, int argc, char **argv, char **argv_eol) {
+/* ===== actions ===== */
+
+int command_silc_connect(void *data, struct t_gui_buffer *buffer, int argc, char **argv, char **argv_eol) {
     char *servername;
     struct t_gui_buffer *server_buffer;
     SilcPluginServerList server;
 
-    if (argc < 2) {
+    if (argc < 3) {
         weechat_printf(buffer, "you need to specify a servername to connect to");
         return WEECHAT_RC_ERROR;
     }
 
-    servername = argv[1];
+    servername = argv[2];
+
+    weechat_printf(server_buffer, "SILC: trying to connect to %s", servername);
 
     // create a new buffer for this connection but merge it into the main window
     server_buffer = weechat_buffer_new(servername, NULL, NULL, NULL, NULL);
     weechat_buffer_merge(server_buffer, weechat_buffer_search_main());
 
-    weechat_printf(server_buffer, "SILC: trying to connect to %s", servername);
     if (!silc_client_connect_to_server(silc_plugin->client, NULL, silc_plugin->public_key, silc_plugin->private_key,
             servername, 706, silc_plugin_connected, server_buffer)) {
         weechat_printf(server_buffer, "%sSILC: connection to server failed", weechat_prefix("error"));
@@ -67,3 +60,29 @@ int command_sconnect(void *data, struct t_gui_buffer *buffer, int argc, char **a
 
     return WEECHAT_RC_OK;
 }
+
+/* ===== the /silc command, our main entry point ===== */
+
+int command_silc(void *data, struct t_gui_buffer *buffer, int argc, char **argv, char **argv_eol) {
+    char *action;
+
+    if (argc < 2) {
+        if (silc_plugin->running) {
+            weechat_printf(buffer, "SILC version %s is running :)", SILC_PLUGIN_VERSION);
+            return WEECHAT_RC_OK;
+        } else {
+            weechat_printf(buffer, "SILC is not running :(");
+            return WEECHAT_RC_ERROR;
+        }
+    }
+
+    action = argv[1];
+
+    if (strncmp(action, "connect", 7) == 0) {
+        return command_silc_connect(data, buffer, argc, argv, argv_eol);
+    }
+
+    weechat_printf(buffer, "unrecognized command %s", action);
+    return WEECHAT_RC_ERROR;
+}
+

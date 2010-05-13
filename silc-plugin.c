@@ -83,7 +83,6 @@ int weechat_plugin_init(struct t_weechat_plugin *plugin, int argc, char *argv[])
     server_list->next = NULL;
 
     weechat_hook_command("silc", "This is the SILC plugin", "", "", NULL, &command_silc, NULL);
-    weechat_hook_command("sconnect", "connect to a SILC server", "servername", "name of the server to connect to", NULL, &command_sconnect, NULL);
     weechat_hook_timer(50, 0, 0, &timer_silc, NULL);
 
     return WEECHAT_RC_OK;
