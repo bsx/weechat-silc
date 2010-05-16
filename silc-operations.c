@@ -149,7 +149,7 @@ void silc_command_reply(SilcClient client, SilcClientConnection conn, SilcComman
             channel->channel_buffer = channelbuffer;
 
             // fill the nicklist with users currently on the channel
-            while (silc_hash_table_get(userlist, &user_client, &user)) {
+            while (silc_hash_table_get(userlist, (void **)&user_client, (void **)&user)) {
                 weechat_nicklist_add_nick(channelbuffer, NULL, user_client->nickname, "white", user->mode & SILC_CHANNEL_UMODE_CHANOP ? "@" : "", "red", 1);
             }
             break;
