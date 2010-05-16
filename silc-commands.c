@@ -80,6 +80,34 @@ int command_silc_disconnect(void *data, struct t_gui_buffer *buffer, int argc, c
     return WEECHAT_RC_OK;
 }
 
+int command_silc_join(void *data, struct t_gui_buffer *buffer, int argc, char **argv, char **argv_eol) {
+    SilcPluginServerList server;
+    char *channelname;
+    char *command;
+    size_t command_length;
+
+    if (argc < 3) {
+        weechat_printf(buffer, "you need to specify a channel to join");
+        return WEECHAT_RC_ERROR;
+    }
+
+    channelname = argv[2];
+    command_length = strlen(channelname) + 6;
+    command = malloc(command_length);
+    memset(command, 0, command_length);
+    snprintf(command, command_length, "JOIN %s", channelname);
+
+    server = find_server_for_buffer(buffer);
+    if (server == NULL) {
+        weechat_printf(buffer, "%sCurrent buffer is not a SILC buffer", weechat_prefix("error"));
+        return WEECHAT_RC_OK;
+    }
+
+    // Join here
+    silc_client_command_call(silc_plugin->client, server->connection, command);
+    return WEECHAT_RC_OK;
+}
+
 /* ===== the /silc command, our main entry point ===== */
 
 int command_silc(void *data, struct t_gui_buffer *buffer, int argc, char **argv, char **argv_eol) {
@@ -103,6 +131,9 @@ int command_silc(void *data, struct t_gui_buffer *buffer, int argc, char **argv,
     }
     if (strncmp(action, "disconnect", 10) == 0) {
         return command_silc_disconnect(data, buffer, argc, argv, argv_eol);
+    }
+    if (strncmp(action, "join", 4) == 0) {
+        return command_silc_join(data, buffer, argc, argv, argv_eol);
     }
 
     weechat_printf(buffer, "unrecognized command %s", action);

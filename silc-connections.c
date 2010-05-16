@@ -40,6 +40,22 @@ struct SilcPluginChannel *find_channel_for_buffer(struct t_gui_buffer *channel_b
     return NULL;
 }
 
+struct t_gui_buffer *find_buffer_for_channel(SilcChannelEntry channel_entry) {
+    struct SilcPluginServer *server;
+    struct SilcPluginChannel *channel;
+
+    server = server_list;
+    while ((server = server->next) != NULL) {
+        channel = server->channels;
+        while ((channel = channel->next) != NULL) {
+            if (channel->channel_entry == channel_entry) {
+                return channel->channel_buffer;
+            }
+        }
+    }
+    return NULL;
+}
+
 struct SilcPluginServer *add_server(char *server_name, SilcClientConnection connection, SilcPublicKey server_key, struct t_gui_buffer *server_buffer) {
     struct SilcPluginServer *server;
     struct SilcPluginServer *new_server;

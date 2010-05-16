@@ -37,6 +37,8 @@ struct SilcPluginChannel *add_channel(char *channel_name, struct SilcPluginServe
 void remove_server(struct SilcPluginServer *server);
 void remove_channel(struct SilcPluginChannel *channel);
 
+struct t_gui_buffer *find_buffer_for_channel(SilcChannelEntry channel_entry);
+
 void list_connections(struct t_gui_buffer *buffer);
 
 #endif /* __SILC_CONNECTIONS_H */

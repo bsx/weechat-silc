@@ -22,7 +22,16 @@ void silc_say(SilcClient client, SilcClientConnection conn, SilcClientMessageTyp
 void silc_channel_message(SilcClient client, SilcClientConnection conn, SilcClientEntry sender,
         SilcChannelEntry channel, SilcMessagePayload payload, SilcChannelPrivateKey key,
         SilcMessageFlags flags, const unsigned char *message, SilcUInt32 message_len) {
-    weechat_log_printf("silc_channel_message was called");
+    struct t_gui_buffer *channel_buffer;
+
+    channel_buffer = find_buffer_for_channel(channel);
+    if (channel_buffer == NULL) {
+        weechat_log_printf("BUG: received message on channel we don't know about! channel: %s, server: %s, message: %s, sender: %s",
+               channel->channel_name, channel->server, message, sender->nickname);
+    } else {
+        weechat_printf(channel_buffer, "%s\t%s", sender->nickname, message);
+        weechat_log_printf("TODO - handle message flags: %d", flags);
+    }
 }
 
 void silc_private_message(SilcClient client, SilcClientConnection conn, SilcClientEntry sender,
@@ -31,27 +40,47 @@ void silc_private_message(SilcClient client, SilcClientConnection conn, SilcClie
 }
 
 void silc_notify(SilcClient client, SilcClientConnection conn, SilcNotifyType type, ...) {
-    char *str;
+    // "infrastructure"
     va_list va;
-    struct t_gui_buffer *server_buffer = NULL;
+    struct t_gui_buffer *buffer = NULL;
     SilcConnectionContext ctx = conn->context;
-    if (ctx) {
-        server_buffer = ctx->server_buffer;
-    }
+
+    // possbile varargs
+    SilcClientEntry other_client;
+    SilcChannelEntry channel;
+    char *str;
 
     va_start(va, type);
 
     switch (type) {
         case SILC_NOTIFY_TYPE_NONE:
             str = va_arg(va, char *);
-            weechat_printf(server_buffer, "%s%s", weechat_prefix("network"), str);
+            if (ctx) {
+                buffer = ctx->server_buffer;
+            }
+            weechat_printf(buffer, "%s%s", weechat_prefix("network"), str);
             break;
         case SILC_NOTIFY_TYPE_MOTD:
             str = va_arg(va, char *);
-            weechat_printf(server_buffer, "%sMOTD: %s", weechat_prefix("network"), str);
+            if (ctx) {
+                buffer = ctx->server_buffer;
+            }
+            weechat_printf(buffer, "%sMOTD: %s", weechat_prefix("network"), str);
+            break;
+        case SILC_NOTIFY_TYPE_JOIN:
+            other_client = va_arg(va, SilcClientEntry);
+            channel = va_arg(va, SilcChannelEntry);
+            buffer = find_buffer_for_channel(channel);
+            weechat_printf(buffer, "%s%s has joined channel %s", weechat_prefix("join"), other_client->nickname, channel->channel_name);
+            break;
+        case SILC_NOTIFY_TYPE_LEAVE:
+            other_client = va_arg(va, SilcClientEntry);
+            channel = va_arg(va, SilcChannelEntry);
+            buffer = find_buffer_for_channel(channel);
+            weechat_printf(buffer, "%s%s has left channel %s", weechat_prefix("quit"), other_client->nickname, channel->channel_name);
             break;
         default:
-            weechat_log_printf("silc_notify was called with unknown type");
+            weechat_log_printf("silc_notify was called with unhandled type %d", type);
             break;
     }
 
@@ -59,11 +88,57 @@ void silc_notify(SilcClient client, SilcClientConnection conn, SilcNotifyType ty
 }
 
 void silc_command(SilcClient client, SilcClientConnection conn, SilcBool success, SilcCommand command, SilcStatus status, SilcUInt32 argc, unsigned char **argv) {
-    weechat_log_printf("SILC command %x was called. Success: %x", command, success);
+    weechat_log_printf("SILC command %d was called. Success: %x", command, success);
 }
 
 void silc_command_reply(SilcClient client, SilcClientConnection conn, SilcCommand command, SilcStatus status, SilcStatus error, va_list ap) {
-    weechat_log_printf("silc_command_reply was called");
+    // "infrastructure"
+    struct t_gui_buffer *channelbuffer;
+    SilcConnectionContext ctx = conn->context;
+
+    // possible args
+    char *str, *topic, *cipher, *hmac;
+    SilcChannelEntry channel_entry;
+    SilcUInt32 mode, userlimit;
+    SilcHashTableList *userlist;
+    SilcPublicKey key;
+    SilcDList pubkeys;
+
+    // needed for the nicklist
+    SilcClientEntry user_client;
+    SilcChannelUser user;
+
+    switch (command) {
+        case SILC_COMMAND_JOIN:
+            str = va_arg(ap, char *);
+            channel_entry = va_arg(ap, SilcChannelEntry);
+            mode = va_arg(ap, SilcUInt32);
+            userlist = va_arg(ap, SilcHashTableList *);
+            topic = va_arg(ap, char *);
+            cipher = va_arg(ap, char *);
+            hmac = va_arg(ap, char *);
+            key = va_arg(ap, SilcPublicKey);
+            pubkeys = va_arg(ap, SilcDList);
+            userlimit = va_arg(ap, SilcUInt32);
+
+            // create a regular chat buffer and set some senible values
+            channelbuffer = weechat_buffer_new(str, NULL, NULL, NULL, NULL);
+            weechat_buffer_set(channelbuffer, "title", topic);
+            weechat_buffer_set(channelbuffer, "hotlist", WEECHAT_HOTLIST_LOW);
+            weechat_buffer_set(channelbuffer, "nicklist", "1");
+
+            // record a reference to this channel and its buffer
+            add_channel(str, find_server_for_buffer(ctx->server_buffer), channel_entry, NULL, channelbuffer);
+
+            // fill the nicklist with users currently on the channel
+            while (silc_hash_table_get(userlist, &user_client, &user)) {
+                weechat_nicklist_add_nick(channelbuffer, NULL, user_client->nickname, "white", user->mode & SILC_CHANNEL_UMODE_CHANOP ? "@" : "", "red", 1);
+            }
+            break;
+        default:
+            weechat_log_printf("unhandled command reply for %d", command);
+            break;
+    }
 }
 
 void silc_get_auth_method(SilcClient client, SilcClientConnection conn, char *hostname, SilcUInt16 port, SilcAuthMethod auth_method, SilcGetAuthMeth completion, void *context) {
