@@ -8,6 +8,7 @@
 struct SilcPluginServer *find_server_for_buffer(struct t_gui_buffer *server_buffer) {
     struct SilcPluginServer *server;
     struct SilcPluginChannel *channel;
+    struct SilcPluginQuery *query;
 
     server = server_list;
     while ((server = server->next) != NULL) {
@@ -17,6 +18,12 @@ struct SilcPluginServer *find_server_for_buffer(struct t_gui_buffer *server_buff
         channel = server->channels;
         while ((channel = channel->next) != NULL) {
             if (channel->channel_buffer == server_buffer) {
+                return server;
+            }
+        }
+        query = server->queries;
+        while ((query = query->next) != NULL) {
+            if (query->query_buffer == server_buffer) {
                 return server;
             }
         }
@@ -40,6 +47,22 @@ struct SilcPluginChannel *find_channel_for_buffer(struct t_gui_buffer *channel_b
     return NULL;
 }
 
+struct SilcPluginQuery *find_query_for_buffer(struct t_gui_buffer *query_buffer) {
+    struct SilcPluginServer *server;
+    struct SilcPluginQuery *query;
+
+    server = server_list;
+    while ((server = server->next) != NULL) {
+        query = server->queries;
+        while ((query = query->next) != NULL) {
+            if (query->query_buffer == query_buffer) {
+                return query;
+            }
+        }
+    }
+    return NULL;
+}
+
 struct t_gui_buffer *find_buffer_for_channel(SilcChannelEntry channel_entry) {
     struct SilcPluginServer *server;
     struct SilcPluginChannel *channel;
@@ -50,6 +73,22 @@ struct t_gui_buffer *find_buffer_for_channel(SilcChannelEntry channel_entry) {
         while ((channel = channel->next) != NULL) {
             if (channel->channel_entry == channel_entry) {
                 return channel->channel_buffer;
+            }
+        }
+    }
+    return NULL;
+}
+
+struct t_gui_buffer *find_buffer_for_query(SilcClientEntry client_entry) {
+    struct SilcPluginServer *server;
+    struct SilcPluginQuery *query;
+
+    server = server_list;
+    while ((server = server->next) != NULL) {
+        query = server->queries;
+        while ((query = query->next) != NULL) {
+            if (query->client_entry == client_entry) {
+                return query->query_buffer;
             }
         }
     }
@@ -80,7 +119,9 @@ struct SilcPluginServer *add_server(char *server_name, SilcClientConnection conn
     new_server->server_key = server_key;
     new_server->server_buffer = server_buffer;
     new_server->channels = malloc(sizeof(struct SilcPluginChannel));
+    new_server->queries = malloc(sizeof(struct SilcPluginQuery));
     memset(new_server->channels, 0, sizeof(struct SilcPluginChannel));
+    memset(new_server->queries, 0, sizeof(struct SilcPluginQuery));
 
     new_server->prev = server;
     server->next = new_server;
@@ -111,11 +152,34 @@ struct SilcPluginChannel *add_channel(char *channel_name, struct SilcPluginServe
     return new_channel;
 }
 
+struct SilcPluginQuery *add_query(struct SilcPluginServer *server, SilcClientEntry client_entry, struct t_gui_buffer *query_buffer) {
+    struct SilcPluginQuery *query;
+    struct SilcPluginQuery *new_query;
+
+    query = server->queries;
+    while (query->next != NULL) {
+        query = query->next;
+    }
+
+    new_query = malloc(sizeof(struct SilcPluginQuery));
+    memset(new_query, 0, sizeof(struct SilcPluginQuery));
+
+    new_query->client_entry = client_entry;
+    new_query->query_buffer = query_buffer;
+
+    new_query->prev = query;
+    query->next = new_query;
+
+    return new_query;
+}
+
 void remove_server(struct SilcPluginServer *server) {
     struct SilcPluginServer *prev;
     struct SilcPluginServer *next;
     struct SilcPluginChannel *channel;
     struct SilcPluginChannel *next_chan;
+    struct SilcPluginQuery *query;
+    struct SilcPluginQuery *next_query;
 
     prev = server->prev;
     next = server->next;
@@ -135,6 +199,13 @@ void remove_server(struct SilcPluginServer *server) {
         }
         free(channel);
         channel = next_chan;
+    }
+
+    query = server->queries;
+    while (query != NULL) {
+        next_query = query->next;
+        free(query);
+        query = next_query;
     }
 
     free(server->server_name);
@@ -157,6 +228,23 @@ void remove_channel(struct SilcPluginChannel *channel) {
 
     free(channel->channel_name);
     free(channel);
+}
+
+void remove_query(struct SilcPluginQuery *query) {
+    struct SilcPluginQuery *prev;
+    struct SilcPluginQuery *next;
+
+    prev = query->prev;
+    next = query->next;
+
+    if (prev != NULL) {
+        prev->next = next;
+    }
+    if (next != NULL) {
+        next->prev = prev;
+    }
+
+    free(query);
 }
 
 void list_connections(struct t_gui_buffer *buffer) {

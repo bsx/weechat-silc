@@ -18,6 +18,17 @@ int silc_plugin_channel_input(void *data, struct t_gui_buffer *buffer, const cha
     return WEECHAT_RC_OK;
 }
 
+int silc_plugin_query_input(void *data, struct t_gui_buffer *buffer, const char *input_data) {
+    SilcPluginQueryList query = data;
+    SilcPluginServerList server = find_server_for_buffer(buffer);
+
+    silc_client_send_private_message(silc_plugin->client, server->connection, query->client_entry,
+            SILC_MESSAGE_FLAG_NONE, NULL, (unsigned char *)input_data, strlen(input_data));
+    weechat_printf(query->query_buffer, "%s\t%s", server->connection->local_entry->nickname, input_data);
+
+    return WEECHAT_RC_OK;
+}
+
 /* silc library callbacks */
 
 void silc_say(SilcClient client, SilcClientConnection conn, SilcClientMessageType type, char *msg, ...) {
@@ -37,9 +48,8 @@ void silc_say(SilcClient client, SilcClientConnection conn, SilcClientMessageTyp
 void silc_channel_message(SilcClient client, SilcClientConnection conn, SilcClientEntry sender,
         SilcChannelEntry channel, SilcMessagePayload payload, SilcChannelPrivateKey key,
         SilcMessageFlags flags, const unsigned char *message, SilcUInt32 message_len) {
-    struct t_gui_buffer *channel_buffer;
+    struct t_gui_buffer *channel_buffer = find_buffer_for_channel(channel);
 
-    channel_buffer = find_buffer_for_channel(channel);
     if (channel_buffer == NULL) {
         weechat_log_printf("BUG: received message on channel we don't know about! channel: %s, server: %s, message: %s, sender: %s",
                channel->channel_name, channel->server, message, sender->nickname);
@@ -51,7 +61,18 @@ void silc_channel_message(SilcClient client, SilcClientConnection conn, SilcClie
 
 void silc_private_message(SilcClient client, SilcClientConnection conn, SilcClientEntry sender,
         SilcMessagePayload payload, SilcMessageFlags flags, const unsigned char *message, SilcUInt32 message_len) {
-    weechat_log_printf("silc_private_message was called");
+    SilcConnectionContext ctx = conn->context;
+    struct t_gui_buffer *server_buffer = ctx->server_buffer;
+    struct t_gui_buffer *query_buffer = find_buffer_for_query(sender);
+    SilcPluginServerList server = find_server_for_buffer(server_buffer);
+    SilcPluginQueryList query;
+
+    if (query_buffer == NULL) {
+        query = add_query(server, sender, NULL);
+        query_buffer = weechat_buffer_new(sender->nickname, &silc_plugin_query_input, query, NULL, NULL);
+        query->query_buffer = query_buffer;
+    }
+    weechat_printf(query_buffer, "%s\t%s", sender->nickname, message);
 }
 
 void silc_notify(SilcClient client, SilcClientConnection conn, SilcNotifyType type, ...) {
