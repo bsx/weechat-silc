@@ -6,6 +6,10 @@
 #include "silc-commands.h"
 #include "silc-connections.h"
 
+/* prototypes for imported functions */
+
+int silc_plugin_query_input(void *data, struct t_gui_buffer *buffer, const char *input_data);
+
 /* ===== completion callbacks ===== */
 
 void silc_plugin_connected(SilcClient client, SilcClientConnection conn, SilcClientConnectionStatus status,
@@ -108,6 +112,45 @@ int command_silc_join(void *data, struct t_gui_buffer *buffer, int argc, char **
     return WEECHAT_RC_OK;
 }
 
+int command_silc_msg(void *data, struct t_gui_buffer *buffer, int argc, char **argv, char **argv_eol) {
+    char *nickname;
+    char *msg;
+    struct t_gui_buffer *query_buffer;
+    SilcPluginQueryList query;
+    SilcClientEntry client_entry;
+    SilcDList list;
+    SilcPluginServerList server = find_server_for_buffer(buffer);
+
+    if (argc < 3) {
+        weechat_printf(buffer, "you need to specify a recipient");
+        return WEECHAT_RC_ERROR;
+    }
+
+    nickname = argv[2];
+    query = find_query_for_nick(server, nickname);
+    if (query == NULL) {
+        list = silc_client_get_clients_local(silc_plugin->client, server->connection, nickname, FALSE);
+        if (list == NULL) {
+            weechat_printf(buffer, "no such nick: %s", nickname);
+            return WEECHAT_RC_OK;
+        }
+        silc_dlist_start(list);
+        client_entry = silc_dlist_get(list);
+        silc_client_list_free(silc_plugin->client, server->connection, list);
+        query = add_query(server, client_entry, NULL);
+        query_buffer = weechat_buffer_new(client_entry->nickname, &silc_plugin_query_input, query, NULL, NULL);
+        query->query_buffer = query_buffer;
+    } else {
+        query_buffer = query->query_buffer;
+    }
+
+    if (argc > 3) {
+        msg = argv_eol[3];
+        silc_plugin_query_input(query, query_buffer, msg);
+    }
+    return WEECHAT_RC_OK;
+}
+
 /* ===== the /silc command, our main entry point ===== */
 
 int command_silc(void *data, struct t_gui_buffer *buffer, int argc, char **argv, char **argv_eol) {
@@ -134,6 +177,9 @@ int command_silc(void *data, struct t_gui_buffer *buffer, int argc, char **argv,
     }
     if (strncmp(action, "join", 4) == 0) {
         return command_silc_join(data, buffer, argc, argv, argv_eol);
+    }
+    if (strncmp(action, "msg", 3) == 0) {
+        return command_silc_msg(data, buffer, argc, argv, argv_eol);
     }
 
     weechat_printf(buffer, "unrecognized command %s", action);

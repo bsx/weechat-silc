@@ -63,6 +63,18 @@ struct SilcPluginQuery *find_query_for_buffer(struct t_gui_buffer *query_buffer)
     return NULL;
 }
 
+struct SilcPluginQuery *find_query_for_nick(struct SilcPluginServer *server, char *nickname) {
+    struct SilcPluginQuery *query;
+
+    query = server->queries;
+    while ((query = query->next) != NULL) {
+        if (strncmp(query->client_entry->nickname, nickname, strlen(nickname)) == 0) {
+            return query;
+        }
+    }
+    return NULL;
+}
+
 struct t_gui_buffer *find_buffer_for_channel(SilcChannelEntry channel_entry) {
     struct SilcPluginServer *server;
     struct SilcPluginChannel *channel;

@@ -43,6 +43,7 @@ SilcPluginServerList server_list;
 struct SilcPluginServer *find_server_for_buffer(struct t_gui_buffer *server_buffer);
 struct SilcPluginChannel *find_channel_for_buffer(struct t_gui_buffer *channel_buffer);
 struct SilcPluginQuery *find_query_for_buffer(struct t_gui_buffer *query_buffer);
+struct SilcPluginQuery *find_query_for_nick(struct SilcPluginServer *server, char *nickname);
 struct SilcPluginServer *add_server(char *server_name, SilcClientConnection connection, SilcPublicKey server_key, struct t_gui_buffer *server_buffer);
 struct SilcPluginChannel *add_channel(char *channel_name, struct SilcPluginServer *server, SilcChannelEntry channel_entry, SilcChannelPrivateKey channel_key, struct t_gui_buffer *channel_buffer);
 struct SilcPluginQuery *add_query(struct SilcPluginServer *server, SilcClientEntry client_entry, struct t_gui_buffer *query_buffer);
