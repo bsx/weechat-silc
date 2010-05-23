@@ -8,6 +8,7 @@
 #include "silc-config.h"
 #include "silc-keys.h"
 #include "silc-connections.h"
+#include "silc-bar.h"
 
 WEECHAT_PLUGIN_NAME(SILC_PLUGIN_NAME);
 WEECHAT_PLUGIN_DESCRIPTION(SILC_PLUGIN_DESCRIPTION);
@@ -84,6 +85,8 @@ int weechat_plugin_init(struct t_weechat_plugin *plugin, int argc, char *argv[])
 
     weechat_hook_command("silc", "This is the SILC plugin", "", "", NULL, &command_silc, NULL);
     weechat_hook_timer(50, 0, 0, &timer_silc, NULL);
+
+    silc_bar_init();
 
     return WEECHAT_RC_OK;
 }
