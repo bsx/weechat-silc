@@ -54,10 +54,9 @@ int command_silc_connect(void *data, struct t_gui_buffer *buffer, int argc, char
 
     servername = argv[2];
 
-    weechat_printf(server_buffer, "SILC: trying to connect to %s", servername);
-
     // create a new buffer for this connection but merge it into the main window
     server_buffer = weechat_buffer_new(servername, NULL, NULL, NULL, NULL);
+    weechat_printf(server_buffer, "SILC: trying to connect to %s", servername);
     weechat_buffer_merge(server_buffer, weechat_buffer_search_main());
 
     if (!silc_client_connect_to_server(silc_plugin->client, NULL, silc_plugin->public_key, silc_plugin->private_key,
