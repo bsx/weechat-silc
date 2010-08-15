@@ -8,12 +8,11 @@
 /* callback funktions for weechat */
 
 int silc_plugin_channel_input(void *data, struct t_gui_buffer *buffer, const char *input_data) {
-    SilcPluginChannelList channel = data;
-    SilcPluginServerList server = find_server_for_buffer(buffer);
+    struct SilcChannelContext *chanCtx = data;
 
-    silc_client_send_channel_message(silc_plugin->client, server->connection, channel->channel_entry,
+    silc_client_send_channel_message(silc_plugin->client, chanCtx->connection, chanCtx->channel_entry,
             NULL, SILC_MESSAGE_FLAG_NONE, NULL, (unsigned char *)input_data, strlen(input_data));
-    weechat_printf(channel->channel_buffer, "%s\t%s", server->connection->local_entry->nickname, input_data);
+    weechat_printf(buffer, "%s\t%s", chanCtx->connection->local_entry->nickname, input_data);
 
     return WEECHAT_RC_OK;
 }
@@ -48,7 +47,7 @@ void silc_say(SilcClient client, SilcClientConnection conn, SilcClientMessageTyp
 void silc_channel_message(SilcClient client, SilcClientConnection conn, SilcClientEntry sender,
         SilcChannelEntry channel, SilcMessagePayload payload, SilcChannelPrivateKey key,
         SilcMessageFlags flags, const unsigned char *message, SilcUInt32 message_len) {
-    struct t_gui_buffer *channel_buffer = find_buffer_for_channel(channel);
+    struct t_gui_buffer *channel_buffer = channel->context;
 
     if (channel_buffer == NULL) {
         weechat_log_printf("BUG: received message on channel we don't know about! channel: %s, server: %s, message: %s, sender: %s",
@@ -130,8 +129,9 @@ void silc_command(SilcClient client, SilcClientConnection conn, SilcBool success
 void silc_command_reply(SilcClient client, SilcClientConnection conn, SilcCommand command, SilcStatus status, SilcStatus error, va_list ap) {
     // "infrastructure"
     struct t_gui_buffer *channelbuffer;
-    SilcConnectionContext ctx = conn->context;
-    SilcPluginChannelList channel;
+    //SilcConnectionContext ctx = conn->context;
+    //SilcPluginChannelList channel;
+    struct SilcChannelContext *chanCtx;
 
     // possible args
     char *str, *topic, *cipher, *hmac;
@@ -158,16 +158,19 @@ void silc_command_reply(SilcClient client, SilcClientConnection conn, SilcComman
             pubkeys = va_arg(ap, SilcDList);
             userlimit = va_arg(ap, SilcUInt32);
 
-            // record a reference to this channel
-            channel = add_channel(str, find_server_for_buffer(ctx->server_buffer), channel_entry, NULL, NULL);
+            chanCtx = malloc(sizeof(struct SilcChannelContext));
+            chanCtx->channel_name = str;
+            chanCtx->channel_entry = channel_entry;
+            chanCtx->connection = conn;
 
             // create a regular chat buffer and set some senible values
-            channelbuffer = weechat_buffer_new(str, &silc_plugin_channel_input, channel, NULL, NULL);
+            channelbuffer = weechat_buffer_new(str, &silc_plugin_channel_input, chanCtx, NULL, NULL);
             weechat_buffer_set(channelbuffer, "title", topic);
             weechat_buffer_set(channelbuffer, "hotlist", WEECHAT_HOTLIST_LOW);
             weechat_buffer_set(channelbuffer, "nicklist", "1");
 
-            channel->channel_buffer = channelbuffer;
+            chanCtx->channel_buffer = channelbuffer;
+            channel_entry->context = channelbuffer;
 
             // fill the nicklist with users currently on the channel
             while (silc_hash_table_get(userlist, (void **)&user_client, (void **)&user)) {

@@ -5,6 +5,13 @@ typedef struct {
     struct t_gui_buffer *server_buffer;
 } *SilcConnectionContext;
 
+struct SilcChannelContext {
+    struct t_gui_buffer *channel_buffer;
+    char *channel_name;
+    SilcChannelEntry channel_entry;
+    SilcClientConnection connection;
+};
+
 struct SilcPluginChannel {
     struct t_gui_buffer *channel_buffer;
     char *channel_name;
