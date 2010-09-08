@@ -12,6 +12,12 @@ struct SilcChannelContext {
     SilcClientConnection connection;
 };
 
+struct SilcClientContext {
+    struct t_gui_buffer *query_buffer;
+    SilcClientEntry client_entry;
+    SilcClientConnection connection;
+};
+
 struct SilcPluginChannel {
     struct t_gui_buffer *channel_buffer;
     char *channel_name;

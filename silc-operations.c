@@ -18,12 +18,11 @@ int silc_plugin_channel_input(void *data, struct t_gui_buffer *buffer, const cha
 }
 
 int silc_plugin_query_input(void *data, struct t_gui_buffer *buffer, const char *input_data) {
-    SilcPluginQueryList query = data;
-    SilcPluginServerList server = find_server_for_buffer(buffer);
+    struct SilcClientContext *clientCtx = data;
 
-    silc_client_send_private_message(silc_plugin->client, server->connection, query->client_entry,
+    silc_client_send_private_message(silc_plugin->client, clientCtx->connection, clientCtx->client_entry,
             SILC_MESSAGE_FLAG_NONE, NULL, (unsigned char *)input_data, strlen(input_data));
-    weechat_printf(query->query_buffer, "%s\t%s", server->connection->local_entry->nickname, input_data);
+    weechat_printf(buffer, "%s\t%s", clientCtx->connection->local_entry->nickname, input_data);
 
     return WEECHAT_RC_OK;
 }
@@ -60,17 +59,18 @@ void silc_channel_message(SilcClient client, SilcClientConnection conn, SilcClie
 
 void silc_private_message(SilcClient client, SilcClientConnection conn, SilcClientEntry sender,
         SilcMessagePayload payload, SilcMessageFlags flags, const unsigned char *message, SilcUInt32 message_len) {
-    SilcConnectionContext ctx = conn->context;
-    struct t_gui_buffer *server_buffer = ctx->server_buffer;
-    struct t_gui_buffer *query_buffer = find_buffer_for_query(sender);
-    SilcPluginServerList server = find_server_for_buffer(server_buffer);
-    SilcPluginQueryList query;
+    struct SilcClientContext *clientCtx;
+    struct t_gui_buffer *query_buffer = sender->context;
 
     if (query_buffer == NULL) {
-        query = add_query(server, sender, NULL);
-        query_buffer = weechat_buffer_new(sender->nickname, &silc_plugin_query_input, query, NULL, NULL);
-        query->query_buffer = query_buffer;
+        clientCtx = malloc(sizeof(struct SilcClientContext));
+        query_buffer = weechat_buffer_new(sender->nickname, &silc_plugin_query_input, clientCtx, NULL, NULL);
+        clientCtx->query_buffer = query_buffer;
+        clientCtx->client_entry = sender;
+        clientCtx->connection = conn;
+        sender->context = query_buffer;
     }
+
     weechat_printf(query_buffer, "%s\t%s", sender->nickname, message);
 }
 
