@@ -115,7 +115,7 @@ int command_silc_msg(void *data, struct t_gui_buffer *buffer, int argc, char **a
     char *nickname;
     char *msg;
     struct t_gui_buffer *query_buffer;
-    SilcPluginQueryList query;
+    struct SilcClientContext *clientCtx;
     SilcClientEntry client_entry;
     SilcDList list;
     SilcPluginServerList server = find_server_for_buffer(buffer);
@@ -126,26 +126,26 @@ int command_silc_msg(void *data, struct t_gui_buffer *buffer, int argc, char **a
     }
 
     nickname = argv[2];
-    query = find_query_for_nick(server, nickname);
-    if (query == NULL) {
-        list = silc_client_get_clients_local(silc_plugin->client, server->connection, nickname, FALSE);
-        if (list == NULL) {
-            weechat_printf(buffer, "no such nick: %s", nickname);
-            return WEECHAT_RC_OK;
-        }
-        silc_dlist_start(list);
-        client_entry = silc_dlist_get(list);
-        silc_client_list_free(silc_plugin->client, server->connection, list);
-        query = add_query(server, client_entry, NULL);
-        query_buffer = weechat_buffer_new(client_entry->nickname, &silc_plugin_query_input, query, NULL, NULL);
-        query->query_buffer = query_buffer;
-    } else {
-        query_buffer = query->query_buffer;
+    list = silc_client_get_clients_local(silc_plugin->client, server->connection, nickname, FALSE);
+    if (list == NULL) {
+        weechat_printf(buffer, "no such nick: %s", nickname);
+        return WEECHAT_RC_OK;
+    }
+    silc_dlist_start(list);
+    client_entry = silc_dlist_get(list);
+    silc_client_list_free(silc_plugin->client, server->connection, list);
+    clientCtx = client_entry->context;
+    if (clientCtx == NULL) {
+        clientCtx = malloc(sizeof(struct SilcClientContext));
+        query_buffer = weechat_buffer_new(client_entry->nickname, &silc_plugin_query_input, clientCtx, NULL, NULL);
+        clientCtx->query_buffer = query_buffer;
+        clientCtx->client_entry = client_entry;
+        clientCtx->connection = server->connection;
     }
 
     if (argc > 3) {
         msg = argv_eol[3];
-        silc_plugin_query_input(query, query_buffer, msg);
+        silc_plugin_query_input(clientCtx, clientCtx->query_buffer, msg);
     }
     return WEECHAT_RC_OK;
 }
