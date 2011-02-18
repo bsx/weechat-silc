@@ -14,7 +14,7 @@ FIND_PACKAGE(PkgConfig QUIET)
 pkg_check_modules(WEECHAT REQUIRED weechat)
 pkg_check_modules(SILC REQUIRED silcclient)
 
-execute_process(COMMAND "hg" "-q" "id" OUTPUT_VARIABLE HGVERSION)
+execute_process(COMMAND "git log | head -n1 | cut -d' ' -f2" OUTPUT_VARIABLE GITVERSION)
 
 # includes
 
@@ -33,7 +33,7 @@ ENDFOREACH(X ${SILC_LDFLAGS})
 
 include_directories(${WEECHATSILC_INCLUDE_DIRS})
 
-ADD_DEFINITIONS(-DHAVE_CONFIG_H -Wall -g -DHGVERSION="\\"${HGVERSION}"\\")
+ADD_DEFINITIONS(-DHAVE_CONFIG_H -Wall -g -DGITVERSION="\\"${GITVERSION}"\\")
 
 ADD_LIBRARY(weechatsilc SHARED silc-plugin.c silc-operations.c silc-commands.c
     silc-config.c silc-keys.c silc-connections.c silc-bar.c silc-modes.c)
