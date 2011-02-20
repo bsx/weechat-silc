@@ -84,6 +84,7 @@ void silc_notify(SilcClient client, SilcClientConnection conn, SilcNotifyType ty
     SilcClientEntry other_client;
     SilcChannelEntry channel;
     char *str;
+    SilcIdType id_type;
 
     va_start(va, type);
 
@@ -114,6 +115,24 @@ void silc_notify(SilcClient client, SilcClientConnection conn, SilcNotifyType ty
             buffer = find_buffer_for_channel(channel);
             weechat_printf(buffer, "%s%s has left channel %s", weechat_prefix("quit"), other_client->nickname, channel->channel_name);
             break;
+        case SILC_NOTIFY_TYPE_TOPIC_SET:
+            id_type = va_arg(va, int);
+            other_client = va_arg(va, SilcClientEntry);
+            str = va_arg(va, char*);
+            channel = va_arg(va, SilcChannelEntry);
+            buffer = channel->context;
+            weechat_buffer_set(buffer, "title", channel->topic);
+            break;
+        case SILC_NOTIFY_TYPE_SIGNOFF:
+        case SILC_NOTIFY_TYPE_NICK_CHANGE:
+        case SILC_NOTIFY_TYPE_CMODE_CHANGE:
+        case SILC_NOTIFY_TYPE_CUMODE_CHANGE:
+        case SILC_NOTIFY_TYPE_CHANNEL_CHANGE:
+        case SILC_NOTIFY_TYPE_SERVER_SIGNOFF:
+        case SILC_NOTIFY_TYPE_KICKED:
+        case SILC_NOTIFY_TYPE_KILLED:
+        case SILC_NOTIFY_TYPE_ERROR:
+        case SILC_NOTIFY_TYPE_WATCH:
         default:
             weechat_log_printf("silc_notify was called with unhandled type %d", type);
             break;
@@ -141,6 +160,8 @@ void silc_command_reply(SilcClient client, SilcClientConnection conn, SilcComman
     SilcPublicKey key;
     SilcDList pubkeys;
 
+    size_t strsize;
+
     // needed for the nicklist
     SilcClientEntry user_client;
     SilcChannelUser user;
@@ -163,8 +184,14 @@ void silc_command_reply(SilcClient client, SilcClientConnection conn, SilcComman
             chanCtx->channel_entry = channel_entry;
             chanCtx->connection = conn;
 
+            strsize = strlen(channel_entry->channel_name) + strlen(channel_entry->server) + 1;
+            str = malloc(strsize+1);
+            snprintf(str, strsize, "%s.%s", channel_entry->channel_name, channel_entry->server);
+
             // create a regular chat buffer and set some senible values
             channelbuffer = weechat_buffer_new(str, &silc_plugin_channel_input, chanCtx, NULL, NULL);
+            weechat_buffer_set(channelbuffer, "name", str);
+            weechat_buffer_set(channelbuffer, "short_name", channel_entry->channel_name);
             weechat_buffer_set(channelbuffer, "title", topic);
             weechat_buffer_set(channelbuffer, "hotlist", WEECHAT_HOTLIST_LOW);
             weechat_buffer_set(channelbuffer, "nicklist", "1");
