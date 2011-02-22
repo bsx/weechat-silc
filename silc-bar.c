@@ -89,7 +89,41 @@ char *silc_bar_input_prompt(void *data, struct t_gui_bar_item *item, struct t_gu
     return NULL;
 }
 
+char *silc_bar_buffer_plugin (void *data, struct t_gui_bar_item *item, struct t_gui_window *window) {
+    struct t_gui_buffer *buffer;
+    struct t_weechat_plugin *ptr_plugin;
+    SilcPluginServerList server;
+    SilcPluginChannelList channel;
+    const char *name;
+    char buf[512];
+
+    if (!window) {
+        window = weechat_current_window();
+    }
+
+    buffer = weechat_window_get_pointer(window, "buffer");
+
+    if (buffer) {
+        ptr_plugin = weechat_buffer_get_pointer(buffer, "plugin");
+        name = weechat_plugin_get_name(ptr_plugin);
+        if (ptr_plugin == weechat_plugin) {
+            server = find_server_for_buffer(buffer);
+            channel = find_channel_for_buffer(buffer);
+            if (server && channel) {
+                snprintf(buf, sizeof(buf), "%s/%s", name, server->server_name);
+            } else {
+                snprintf(buf, sizeof(buf), "%s", name);
+            }
+        } else {
+            snprintf(buf, sizeof(buf), "%s", name);
+        }
+        return strdup(buf);
+    }
+    return NULL;
+}
+
 void silc_bar_init() {
     weechat_bar_item_new("buffer_name", &silc_bar_buffer_name, NULL);
+    weechat_bar_item_new("buffer_plugin", &silc_bar_buffer_plugin, NULL);
     weechat_bar_item_new("input_prompt", &silc_bar_input_prompt, NULL);
 }

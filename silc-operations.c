@@ -147,8 +147,8 @@ void silc_command(SilcClient client, SilcClientConnection conn, SilcBool success
 
 void silc_command_reply(SilcClient client, SilcClientConnection conn, SilcCommand command, SilcStatus status, SilcStatus error, va_list ap) {
     // "infrastructure"
-    struct t_gui_buffer *channelbuffer;
-    //SilcConnectionContext ctx = conn->context;
+    struct t_gui_buffer *channelbuffer, *serverbuffer;
+    SilcConnectionContext ctx = conn->context;
     //SilcPluginChannelList channel;
     struct SilcChannelContext *chanCtx;
 
@@ -199,9 +199,15 @@ void silc_command_reply(SilcClient client, SilcClientConnection conn, SilcComman
             chanCtx->channel_buffer = channelbuffer;
             channel_entry->context = channelbuffer;
 
+            serverbuffer = ctx->server_buffer;
+
+            add_channel(channel_entry->channel_name, find_server_for_buffer(serverbuffer), channel_entry, NULL, channelbuffer);
+
             // fill the nicklist with users currently on the channel
             while (silc_hash_table_get(userlist, (void **)&user_client, (void **)&user)) {
-                weechat_nicklist_add_nick(channelbuffer, NULL, user_client->nickname, "white", user->mode & SILC_CHANNEL_UMODE_CHANOP ? "@" : "", "red", 1);
+                weechat_nicklist_add_nick(channelbuffer, NULL, user_client->nickname,
+                        (channel_entry->founder_key != NULL && user_client->public_key == channel_entry->founder_key) ? "red": "white",
+                        user->mode & SILC_CHANNEL_UMODE_CHANOP ? "@" : "", "red", 1);
             }
             break;
         default:
