@@ -53,6 +53,7 @@ void silc_channel_message(SilcClient client, SilcClientConnection conn, SilcClie
                channel->channel_name, channel->server, message, sender->nickname);
     } else {
         weechat_printf(channel_buffer, "%s\t%s", sender->nickname, message);
+        weechat_buffer_set(channel_buffer, "hotlist", WEECHAT_HOTLIST_MESSAGE);
         weechat_log_printf("TODO - handle message flags: %d", flags);
     }
 }
@@ -72,6 +73,7 @@ void silc_private_message(SilcClient client, SilcClientConnection conn, SilcClie
     }
 
     weechat_printf(query_buffer, "%s\t%s", sender->nickname, message);
+    weechat_buffer_set(query_buffer, "hotlist", WEECHAT_HOTLIST_HIGHLIGHT);
 }
 
 void silc_notify(SilcClient client, SilcClientConnection conn, SilcNotifyType type, ...) {
