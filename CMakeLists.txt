@@ -11,7 +11,7 @@ INCLUDE(CheckIncludeFile)
 INCLUDE(CheckIncludeFiles)
 
 FIND_PACKAGE(PkgConfig QUIET)
-pkg_check_modules(WEECHAT REQUIRED weechat)
+pkg_check_modules(WEECHAT REQUIRED weechat>=0.3.4)
 pkg_check_modules(SILC REQUIRED silcclient)
 
 execute_process(COMMAND "git log | head -n1 | cut -d' ' -f2" OUTPUT_VARIABLE GITVERSION)

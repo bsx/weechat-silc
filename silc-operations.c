@@ -110,7 +110,7 @@ void silc_notify(SilcClient client, SilcClientConnection conn, SilcNotifyType ty
             other_client = va_arg(va, SilcClientEntry);
             channel = va_arg(va, SilcChannelEntry);
             buffer = find_buffer_for_channel(channel);
-            silc_nicklist_add(channel, other_client);
+            silc_nicklist_add(silc_client_on_channel(channel, other_client));
             weechat_printf(buffer, "%s%s has joined channel %s", weechat_prefix("join"), other_client->nickname, channel->channel_name);
             break;
         case SILC_NOTIFY_TYPE_LEAVE:
@@ -129,6 +129,13 @@ void silc_notify(SilcClient client, SilcClientConnection conn, SilcNotifyType ty
             weechat_buffer_set(buffer, "title", channel->topic);
             break;
         case SILC_NOTIFY_TYPE_SIGNOFF:
+            other_client = va_arg(va, SilcClientEntry);
+            str = va_arg(va, char*);
+            channel = va_arg(va, SilcChannelEntry);
+            buffer = find_buffer_for_channel(channel);
+            silc_nicklist_remove(channel, other_client);
+            weechat_printf(buffer, "%s%s has quit (%s)", weechat_prefix("quit"), other_client->nickname, str);
+            break;
         case SILC_NOTIFY_TYPE_NICK_CHANGE:
         case SILC_NOTIFY_TYPE_CMODE_CHANGE:
         case SILC_NOTIFY_TYPE_CUMODE_CHANGE:
@@ -211,10 +218,7 @@ void silc_command_reply(SilcClient client, SilcClientConnection conn, SilcComman
 
             // fill the nicklist with users currently on the channel
             while (silc_hash_table_get(userlist, (void **)&user_client, (void **)&user)) {
-                nick = silc_nicklist_add(channel_entry, user_client);
-                if (nick && user->mode & SILC_CHANNEL_UMODE_CHANOP) {
-                    weechat_nicklist_nick_set(channelbuffer, nick, "prefix", "@");
-                }
+                nick = silc_nicklist_add(user);
             }
             break;
         default:
