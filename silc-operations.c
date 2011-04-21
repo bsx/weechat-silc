@@ -4,6 +4,7 @@
 
 #include "silc-plugin.h"
 #include "silc-connections.h"
+#include "silc-nicklist.h"
 
 /* callback funktions for weechat */
 
@@ -109,12 +110,14 @@ void silc_notify(SilcClient client, SilcClientConnection conn, SilcNotifyType ty
             other_client = va_arg(va, SilcClientEntry);
             channel = va_arg(va, SilcChannelEntry);
             buffer = find_buffer_for_channel(channel);
+            silc_nicklist_add(channel, other_client);
             weechat_printf(buffer, "%s%s has joined channel %s", weechat_prefix("join"), other_client->nickname, channel->channel_name);
             break;
         case SILC_NOTIFY_TYPE_LEAVE:
             other_client = va_arg(va, SilcClientEntry);
             channel = va_arg(va, SilcChannelEntry);
             buffer = find_buffer_for_channel(channel);
+            silc_nicklist_remove(channel, other_client);
             weechat_printf(buffer, "%s%s has left channel %s", weechat_prefix("quit"), other_client->nickname, channel->channel_name);
             break;
         case SILC_NOTIFY_TYPE_TOPIC_SET:
@@ -167,6 +170,7 @@ void silc_command_reply(SilcClient client, SilcClientConnection conn, SilcComman
     // needed for the nicklist
     SilcClientEntry user_client;
     SilcChannelUser user;
+    struct t_gui_nick *nick = NULL;
 
     switch (command) {
         case SILC_COMMAND_JOIN:
@@ -207,9 +211,10 @@ void silc_command_reply(SilcClient client, SilcClientConnection conn, SilcComman
 
             // fill the nicklist with users currently on the channel
             while (silc_hash_table_get(userlist, (void **)&user_client, (void **)&user)) {
-                weechat_nicklist_add_nick(channelbuffer, NULL, user_client->nickname,
-                        (channel_entry->founder_key != NULL && user_client->public_key == channel_entry->founder_key) ? "red": "white",
-                        user->mode & SILC_CHANNEL_UMODE_CHANOP ? "@" : "", "red", 1);
+                nick = silc_nicklist_add(channel_entry, user_client);
+                if (nick && user->mode & SILC_CHANNEL_UMODE_CHANOP) {
+                    weechat_nicklist_nick_set(channelbuffer, nick, "prefix", "@");
+                }
             }
             break;
         default:

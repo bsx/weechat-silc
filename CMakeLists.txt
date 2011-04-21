@@ -36,7 +36,8 @@ include_directories(${WEECHATSILC_INCLUDE_DIRS})
 ADD_DEFINITIONS(-DHAVE_CONFIG_H -Wall -g -DGITVERSION="\\"${GITVERSION}"\\")
 
 ADD_LIBRARY(weechatsilc SHARED silc-plugin.c silc-operations.c silc-commands.c
-    silc-config.c silc-keys.c silc-connections.c silc-bar.c silc-modes.c)
+    silc-config.c silc-keys.c silc-connections.c silc-bar.c silc-modes.c
+    silc-nicklist.c)
 TARGET_LINK_LIBRARIES(weechatsilc ${SILC_LIBRARIES})
 SET_TARGET_PROPERTIES(weechatsilc PROPERTIES 
   OUTPUT_NAME "weechatsilc"
