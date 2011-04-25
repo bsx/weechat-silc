@@ -69,8 +69,7 @@ char *silc_bar_input_prompt(void *data, struct t_gui_bar_item *item, struct t_gu
         if (server) {
             nick = server->connection->local_entry->nickname;
             if (channel) {
-                // TODO: find ourselfs in the channel user list and determine modes
-                mode = format_user_mode(server->connection->local_entry->mode);
+                mode = format_channeluser_mode(silc_client_on_channel(channel->channel_entry, server->connection->local_entry)->mode);
             } else {
                 mode = format_user_mode(server->connection->local_entry->mode);
             }
