@@ -8,7 +8,7 @@
 
 /* prototypes for imported functions */
 
-int silc_plugin_query_input(void *data, struct t_gui_buffer *buffer, const char *input_data);
+int silc_plugin_query_input(const void *pointer, void *data, struct t_gui_buffer *buffer, const char *input_data);
 
 /* ===== completion callbacks ===== */
 
@@ -55,7 +55,7 @@ int command_silc_connect(void *data, struct t_gui_buffer *buffer, int argc, char
     servername = argv[2];
 
     // create a new buffer for this connection but merge it into the main window
-    server_buffer = weechat_buffer_new(servername, NULL, NULL, NULL, NULL);
+    server_buffer = weechat_buffer_new(servername, NULL, NULL, NULL, NULL, NULL, NULL);
     weechat_printf(server_buffer, "SILC: trying to connect to %s", servername);
     weechat_buffer_merge(server_buffer, weechat_buffer_search_main());
 
@@ -137,7 +137,7 @@ int command_silc_msg(void *data, struct t_gui_buffer *buffer, int argc, char **a
     clientCtx = client_entry->context;
     if (clientCtx == NULL) {
         clientCtx = malloc(sizeof(struct SilcClientContext));
-        query_buffer = weechat_buffer_new(client_entry->nickname, &silc_plugin_query_input, clientCtx, NULL, NULL);
+        query_buffer = weechat_buffer_new(client_entry->nickname, &silc_plugin_query_input, NULL, clientCtx, NULL, NULL, NULL);
         clientCtx->query_buffer = query_buffer;
         clientCtx->client_entry = client_entry;
         clientCtx->connection = server->connection;
@@ -145,14 +145,14 @@ int command_silc_msg(void *data, struct t_gui_buffer *buffer, int argc, char **a
 
     if (argc > 3) {
         msg = argv_eol[3];
-        silc_plugin_query_input(clientCtx, clientCtx->query_buffer, msg);
+        silc_plugin_query_input(NULL, clientCtx, clientCtx->query_buffer, msg);
     }
     return WEECHAT_RC_OK;
 }
 
 /* ===== the /silc command, our main entry point ===== */
 
-int command_silc(void *data, struct t_gui_buffer *buffer, int argc, char **argv, char **argv_eol) {
+int command_silc(const void *pointer, void *data, struct t_gui_buffer *buffer, int argc, char **argv, char **argv_eol) {
     char *action;
 
     if (argc < 2) {

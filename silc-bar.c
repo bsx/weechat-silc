@@ -6,8 +6,7 @@
 #include "silc-connections.h"
 #include "silc-modes.h"
 
-char *silc_bar_buffer_name(void *data, struct t_gui_bar_item *item, struct t_gui_window *window) {
-    struct t_gui_buffer *buffer;
+char *silc_bar_buffer_name(const void *pointer, void *data, struct t_gui_bar_item *item, struct t_gui_window *window, struct t_gui_buffer *buffer, struct t_hashtable *extra_info) {
     SilcPluginServerList server;
     SilcPluginChannelList channel;
     SilcPluginQueryList query;
@@ -18,7 +17,9 @@ char *silc_bar_buffer_name(void *data, struct t_gui_bar_item *item, struct t_gui
         window = weechat_current_window();
     }
 
-    buffer = weechat_window_get_pointer(window, "buffer");
+    if (!buffer) {
+        buffer = weechat_current_buffer();
+    }
 
     if (buffer) {
         server = find_server_for_buffer(buffer);
@@ -50,8 +51,7 @@ char *silc_bar_buffer_name(void *data, struct t_gui_bar_item *item, struct t_gui
     return NULL;
 }
 
-char *silc_bar_input_prompt(void *data, struct t_gui_bar_item *item, struct t_gui_window *window) {
-    struct t_gui_buffer *buffer;
+char *silc_bar_input_prompt(const void *pointer, void *data, struct t_gui_bar_item *item, struct t_gui_window *window, struct t_gui_buffer *buffer, struct t_hashtable *extra_info) {
     SilcPluginServerList server;
     SilcPluginChannelList channel;
     char *prompt, *nick, *mode, *pattern;
@@ -61,7 +61,9 @@ char *silc_bar_input_prompt(void *data, struct t_gui_bar_item *item, struct t_gu
         window = weechat_current_window();
     }
 
-    buffer = weechat_window_get_pointer(window, "buffer");
+    if (!buffer) {
+        buffer = weechat_current_buffer();
+    }
 
     if (buffer) {
         server = find_server_for_buffer(buffer);
@@ -88,8 +90,7 @@ char *silc_bar_input_prompt(void *data, struct t_gui_bar_item *item, struct t_gu
     return NULL;
 }
 
-char *silc_bar_buffer_plugin (void *data, struct t_gui_bar_item *item, struct t_gui_window *window) {
-    struct t_gui_buffer *buffer;
+char *silc_bar_buffer_plugin(const void *pointer, void *data, struct t_gui_bar_item *item, struct t_gui_window *window, struct t_gui_buffer *buffer, struct t_hashtable *extra_info) {
     struct t_weechat_plugin *ptr_plugin;
     SilcPluginServerList server;
     SilcPluginChannelList channel;
@@ -100,7 +101,9 @@ char *silc_bar_buffer_plugin (void *data, struct t_gui_bar_item *item, struct t_
         window = weechat_current_window();
     }
 
-    buffer = weechat_window_get_pointer(window, "buffer");
+    if (!buffer) {
+        buffer = weechat_current_buffer();
+    }
 
     if (buffer) {
         ptr_plugin = weechat_buffer_get_pointer(buffer, "plugin");
@@ -122,7 +125,7 @@ char *silc_bar_buffer_plugin (void *data, struct t_gui_bar_item *item, struct t_
 }
 
 void silc_bar_init() {
-    weechat_bar_item_new("buffer_name", &silc_bar_buffer_name, NULL);
-    weechat_bar_item_new("buffer_plugin", &silc_bar_buffer_plugin, NULL);
-    weechat_bar_item_new("input_prompt", &silc_bar_input_prompt, NULL);
+    weechat_bar_item_new("buffer_name", &silc_bar_buffer_name, NULL, NULL);
+    weechat_bar_item_new("buffer_plugin", &silc_bar_buffer_plugin, NULL, NULL);
+    weechat_bar_item_new("input_prompt", &silc_bar_input_prompt, NULL, NULL);
 }

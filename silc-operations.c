@@ -8,7 +8,7 @@
 
 /* callback funktions for weechat */
 
-int silc_plugin_channel_input(void *data, struct t_gui_buffer *buffer, const char *input_data) {
+int silc_plugin_channel_input(const void *pointer, void *data, struct t_gui_buffer *buffer, const char *input_data) {
     struct SilcChannelContext *chanCtx = data;
 
     silc_client_send_channel_message(silc_plugin->client, chanCtx->connection, chanCtx->channel_entry,
@@ -18,7 +18,7 @@ int silc_plugin_channel_input(void *data, struct t_gui_buffer *buffer, const cha
     return WEECHAT_RC_OK;
 }
 
-int silc_plugin_query_input(void *data, struct t_gui_buffer *buffer, const char *input_data) {
+int silc_plugin_query_input(const void *pointer, void *data, struct t_gui_buffer *buffer, const char *input_data) {
     struct SilcClientContext *clientCtx = data;
 
     silc_client_send_private_message(silc_plugin->client, clientCtx->connection, clientCtx->client_entry,
@@ -66,7 +66,7 @@ void silc_private_message(SilcClient client, SilcClientConnection conn, SilcClie
 
     if (query_buffer == NULL) {
         clientCtx = malloc(sizeof(struct SilcClientContext));
-        query_buffer = weechat_buffer_new(sender->nickname, &silc_plugin_query_input, clientCtx, NULL, NULL);
+        query_buffer = weechat_buffer_new(sender->nickname, &silc_plugin_query_input, NULL, clientCtx, NULL, NULL, NULL);
         clientCtx->query_buffer = query_buffer;
         clientCtx->client_entry = sender;
         clientCtx->connection = conn;
@@ -126,7 +126,7 @@ void silc_command_reply(SilcClient client, SilcClientConnection conn, SilcComman
             snprintf(str, strsize, "%s.%s", channel_entry->channel_name, channel_entry->server);
 
             // create a regular chat buffer and set some senible values
-            channelbuffer = weechat_buffer_new(str, &silc_plugin_channel_input, chanCtx, NULL, NULL);
+            channelbuffer = weechat_buffer_new(str, &silc_plugin_channel_input, NULL, chanCtx, NULL, NULL, NULL);
             weechat_buffer_set(channelbuffer, "name", str);
             weechat_buffer_set(channelbuffer, "short_name", channel_entry->channel_name);
             weechat_buffer_set(channelbuffer, "title", topic);

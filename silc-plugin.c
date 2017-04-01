@@ -33,7 +33,7 @@ void silc_stopped(SilcClient client, void *application) {
 /* ===== weechat plugin interface ===== */
 
 // this is the simulation of a main loop that makes the silc client do its work
-int timer_silc(void *data, int remaining_calls) {
+int timer_silc(const void *pointer, void *data, int remaining_calls) {
     silc_client_run_one(silc_plugin->client);
     return WEECHAT_RC_OK;
 }
@@ -83,8 +83,8 @@ int weechat_plugin_init(struct t_weechat_plugin *plugin, int argc, char *argv[])
     server_list = malloc(sizeof(struct SilcPluginServer));
     memset(server_list, 0, sizeof(struct SilcPluginServer));
 
-    weechat_hook_command("silc", "This is the SILC plugin", "", "", NULL, &command_silc, NULL);
-    weechat_hook_timer(50, 0, 0, &timer_silc, NULL);
+    weechat_hook_command("silc", "This is the SILC plugin", "", "", NULL, &command_silc, NULL, NULL);
+    weechat_hook_timer(50, 0, 0, &timer_silc, NULL, NULL);
 
     silc_bar_init();
 
