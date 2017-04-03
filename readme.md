@@ -5,9 +5,10 @@
 
 A WeeChat [plugin](https://weechat.org/files/doc/stable/weechat_plugin_api.en.html) allowing you to use you to use silc
 
-[![Total Downloads](https://poser.pugx.org/bsx/weechat-silc/downloads)](https://packagist.org/packages/bsx/weechat-silc)
-[![Latest Stable Version](https://poser.pugx.org/bsx/weechat-silc/v/stable)](https://packagist.org/packages/bsx/weechat-silc)
-[![License](https://poser.pugx.org/bsx/weechat-silc/license)](https://packagist.org/packages/bsx/weechat-silc)
+[![GitHub version](https://badge.fury.io/gh/bsx%2Fweechat-silc.svg)](https://badge.fury.io/gh/bsx%2Fweechat-silc)
+[![GitHub forks](https://img.shields.io/github/forks/bsx/weechat-silc.svg)](https://github.com/bsx/weechat-silc/network)
+[![GitHub issues](https://img.shields.io/github/issues/bsx/weechat-silc.svg)](https://github.com/bsx/weechat-silc/issues)
+[![GitHub license](https://img.shields.io/badge/license-Apache%202-blue.svg)](https://raw.githubusercontent.com/bsx/weechat-silc/master/license)
 
 # Installation
 
@@ -38,8 +39,8 @@ sudo make install
 If you get a CMake Error that either module `silccliient` or `weemake` were not found 
 
 ```
--- checking for module 'weechat>=0.3.4'
---   package 'weechat>=0.3.4' not found
+-- checking for module 'weechat>=1.5'
+--   package 'weechat>=1.5' not found
 CMake Error at /usr/share/cmake/Modules/FindPkgConfig.cmake:279 (message):
   A required package was not found
 Call Stack (most recent call first):
