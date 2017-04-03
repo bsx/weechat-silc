@@ -1,7 +1,7 @@
 
 [![](media/weechat.png)](https://weechat.org/)
 ![](media/plus128.png)
-[![](media/silc.png)](//https://en.wikipedia.org/wiki/SILC_(protocol))
+[![](media/silc.png)](https://en.wikipedia.org/wiki/SILC_(protocol))
 
 A WeeChat [plugin](https://weechat.org/files/doc/stable/weechat_plugin_api.en.html) allowing you to use you to use silc
 
