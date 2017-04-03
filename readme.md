@@ -11,7 +11,7 @@ A WeeChat [plugin](https://weechat.org/files/doc/stable/weechat_plugin_api.en.ht
 
 # Installation
 
-* Install [weechat](https://weechat.org/download/) either from source or with your favorite manager
+* Install [weechat](https://weechat.org/download/) either from source or with your favorite package manager
   * Make sure `weechat.pc` is in either `/usr/lib/pkgconfig/` or /usr/local/lib/pkgconfig/` 
 * Install [the silc tookit](https://sourceforge.net/projects/silc/files/silc/toolkit/) either from source or your favorite package manager
   * Make sure `silcclient.pc` is in either `/usr/lib/pkgconfig/` or /usr/local/lib/pkgconfig/` 
@@ -19,7 +19,7 @@ A WeeChat [plugin](https://weechat.org/files/doc/stable/weechat_plugin_api.en.ht
 ```bash
 git clone git@github.com:bsx/weechat-silc.git
 ```
-* Make a build directory and cmake/make
+* Make a build directory and run `cmake` and `make`
 ```bash
 cd weechat-silc
 mkdir build
