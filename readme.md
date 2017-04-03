@@ -3,7 +3,7 @@
 ![](media/plus128.png)
 [![](media/silc.png)](https://en.wikipedia.org/wiki/SILC_(protocol))
 
-A WeeChat [plugin](https://weechat.org/files/doc/stable/weechat_plugin_api.en.html) allowing you to use you to use silc
+A WeeChat [plugin](https://weechat.org/files/doc/stable/weechat_plugin_api.en.html) for silc
 
 [![GitHub version](https://badge.fury.io/gh/bsx%2Fweechat-silc.svg)](https://badge.fury.io/gh/bsx%2Fweechat-silc)
 [![GitHub forks](https://img.shields.io/github/forks/bsx/weechat-silc.svg)](https://github.com/bsx/weechat-silc/network)
