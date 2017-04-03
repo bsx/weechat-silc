@@ -35,7 +35,27 @@ sudo make install
 
 # Troubleshooting
 
-If you get a CMake Error that either module `silccliient` or `weemake` you might need to set your `PKG_CONFIG_PATH` so it can find both of the `.pc` files
+If you get a CMake Error that either module `silccliient` or `weemake` were not found 
+
+```
+-- checking for module 'weechat>=0.3.4'
+--   package 'weechat>=0.3.4' not found
+CMake Error at /usr/share/cmake/Modules/FindPkgConfig.cmake:279 (message):
+  A required package was not found
+Call Stack (most recent call first):
+  /usr/share/cmake/Modules/FindPkgConfig.cmake:333 (_pkg_check_modules_internal)
+  CMakeLists.txt:14 (pkg_check_modules)
+
+-- checking for module 'silcclient'
+--   package 'silcclient' not found
+CMake Error at /usr/share/cmake/Modules/FindPkgConfig.cmake:279 (message):
+  A required package was not found
+Call Stack (most recent call first):
+  /usr/share/cmake/Modules/FindPkgConfig.cmake:333 (_pkg_check_modules_internal)
+  CMakeLists.txt:15 (pkg_check_modules)
+```
+
+You either don't have the appropiate `.pc` files in their right place or you might need to set your `PKG_CONFIG_PATH`
 ```bash
 export PKG_CONFIG_PATH=/usr/lib/pkgconfig:/usr/local/lib/pkgconfig:/usr/lib64/pkgconfig:/usr/share/pkgconfig
 ```
