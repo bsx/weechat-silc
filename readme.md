@@ -61,6 +61,11 @@ You either don't have the appropiate `.pc` files in their right place or you mig
 export PKG_CONFIG_PATH=/usr/lib/pkgconfig:/usr/local/lib/pkgconfig:/usr/lib64/pkgconfig:/usr/share/pkgconfig
 ```
 
+Run `ldd libweechatsilc.so` to make sure your libraries are linked correctly, if not you might need to do
+```bash
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
+```
+
 # Usage
 
 
